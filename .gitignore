@@ -1,0 +1,5 @@
+cfltk-build/
+_build/
+build/
+bundle/
+local_janet_deps/
