@@ -13,8 +13,8 @@
 (declare-native
   :name "jfltk"
   :source @["c/module.cpp"]
-  :c++flags @["-I./cfltk/include"]
-  :lflags @["-L./cfltk-build" "-lcfltk" "-L./cfltk-build/fltk/lib" "-lfltk"
-            "-lfltk_images" "-lfltk_forms" "-lfltk_png" "-lfltk_jpeg" "-lfltk_z"
-            "-framework" "Cocoa" "-weak_framework" "ScreenCaptureKit" "-weak_framework" "UniformTypeIdentifiers"]
+  :c++flags @["-I./cfltk/include" "-DCFLTK_USE_GL"]
+  :lflags @["-L./cfltk-build" "-lcfltk" "-L./cfltk-build/fltk/lib"
+            "-lfltk_images" "-lfltk_forms" "-lfltk_gl"  "-lfltk" "-lfltk_png""-lfltk_jpeg" "-lfltk_z"
+            "-framework" "Cocoa" "-framework" "OpenGL" "-weak_framework" "ScreenCaptureKit" "-weak_framework" "UniformTypeIdentifiers"]
   )

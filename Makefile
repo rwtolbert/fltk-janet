@@ -28,11 +28,11 @@ ${LOCAL_JANET_LIB}:
 
 .PHONY: cfltk
 cfltk:
-	cmake -B cfltk-build -S cfltk -G "Unix Makefiles"
-	cd cfltk-build && make
+	cmake -B cfltk-build -S cfltk -G "Unix Makefiles" -DCFLTK_USE_OPENGL=ON
+	cd cfltk-build && make -j
 
-.PHONY: deps cfltk
-deps: ${LOCAL_JANET_LIB}
+.PHONY: deps
+deps: cfltk ${LOCAL_JANET_LIB}
 	@$(JANET_PM) deps
 
 .PHONY: build
