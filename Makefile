@@ -32,7 +32,7 @@ cfltk:
 	cd cfltk-build && make -j
 
 .PHONY: deps
-deps: cfltk ${LOCAL_JANET_LIB}
+deps: ${LOCAL_JANET_LIB}
 	@$(JANET_PM) deps
 
 .PHONY: build

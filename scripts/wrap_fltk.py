@@ -18,6 +18,106 @@ def fully_qualified(c):
     return c.spelling
 
 
+CALLBACK = '''
+
+class Callbacker {
+private:
+    JanetFunction* _func = nullptr;
+
+public:
+    explicit Callbacker(JanetFunction* fn) : _func(fn) {
+        std::cerr << "Callbacker ctor " << std::endl;
+    }
+    Callbacker() = delete;
+    Callbacker(const Callbacker& rhs) = delete;
+    Callbacker(const Callbacker&& rhs) = delete;
+    Callbacker& operator=(const Callbacker& rhs) = delete;
+    Callbacker& operator=(const Callbacker&& rhs) = delete;
+
+    void static static_callback(Fl_Widget* w, void *data) {
+        static_cast<Callbacker*>(data)->callback(w);
+    }
+    void callback(Fl_Widget* w) {
+        std::cerr << "in callback " << std::endl;
+        Janet args[1] = { janet_wrap_pointer(w) };
+        if (_func) {
+            janet_call(_func, 1, args);
+        }
+    }
+    ~Callbacker() {
+        if (_func)
+            janet_mark(janet_wrap_function(_func));
+        std::cerr << "Callbacker dtor " << std::endl;
+    }
+};
+
+struct JanetFlCallback {
+  JanetGCObject gc;
+  Callbacker* cb = nullptr;
+};
+
+int callback_set_gc(void *data, size_t len) {
+  (void)len;
+  if (data) {
+    JanetFlCallback *self = (JanetFlCallback *)data;
+    delete(self->cb);
+    self->cb = nullptr;
+  }
+  return 0;
+}
+
+int callback_set_gcmark(void *data, size_t len) {
+  (void)len;
+  return 0;
+}
+
+void callback_set_tostring(void *data, JanetBuffer *buffer) {
+  if (data) {
+    JanetFlCallback *self = (JanetFlCallback *)data;
+    janet_buffer_push_cstring(buffer, "<JanetFlCallback>");
+  }
+}
+
+JanetAbstractType callbacker_type = {};
+
+void initialize_callbacker_type() {
+  if (!callbacker_type.name) {
+    callbacker_type.name = "callbacker";
+    callbacker_type.gc = callback_set_gc;
+    callbacker_type.gcmark = callback_set_gcmark;
+    callbacker_type.tostring = callback_set_tostring;
+  }
+}
+
+JanetFlCallback *new_abstract_callback(JanetFunction *fn, const Janet *argv,
+                                       int32_t flag_start, int32_t argc) {
+  initialize_callbacker_type();
+  JanetFlCallback *cb = (JanetFlCallback *)janet_abstract(&callbacker_type, sizeof(Callbacker));
+  auto *callbacker = new Callbacker(fn);
+  cb->cb = callbacker;
+  return cb;
+}
+
+JANET_FN(cfun_new_fl_callback, "(jfltk/new_fl_callback fn)", "Create new Fl_Callback") {
+    janet_fixarity(argc, 1);
+    JanetFlCallback* cb = nullptr;
+    if (!janet_checktype(argv[0], JANET_FUNCTION)) {
+        janet_panicf("expected function, got %%q", argv[0]);
+    }
+    JanetFunction * jarg1 = (JanetFunction *)janet_getfunction(argv, 0);
+    cb = new_abstract_callback(jarg1, argv, 0, 0);
+    return janet_wrap_abstract(cb);
+}
+
+Fl_Callback* make_callback(Janet* f) {
+    auto func = janet_unwrap_function(*f);
+    return [](Fl_Widget* w, void* data) {
+        Fl_Widget_set_label(w, "Goodbye");
+    };
+}
+
+'''
+
 TEMPLATE = '''
 JANET_FN(cfun_{name},
          "(jfltk/{name}{arg_string})",
@@ -45,6 +145,19 @@ PTR_TEMPLATE  = '''    if (!janet_checktype(argv[{N}], {jtype})) {{
     }}
 '''
 
+JANET_FUNC_TEMPLATE  = '''    if (!janet_checktype(argv[{N}], {jtype})) {{
+        janet_panicf("expected {argtype}, got %%q", argv[{N}]);
+    }}
+    {argtype} jarg{N} = ({argtype}){jfunc}(argv, {N}, &callbacker_type);
+    if (!jarg{N}) {{
+        janet_panicf("expected {argtype}, got nil");
+    }}
+    std::cerr << "make callback" << std::endl;
+    // auto arg{N} = make_callback(jarg{N});
+    auto arg{N} = jarg{N}->cb->static_callback;
+    void* arg{N_next} = (void*)jarg{N}->cb;
+'''
+
 CALL_TEMPLATE = '''    {return_val} out = ({return_val}){name}({arg_string});
     return {wrap_func}(out);'''
 
@@ -60,11 +173,18 @@ def print_arg(N, arg):
     template = ARG_TEMPLATE
 
     # special case for Fl_Callback for now
-    if argtype.find("Fl_Callback") >= 0:
-        print("  CB", argtype, type_kind)
-        return None
+    if argtype == "Fl_Callback *":
+        template = JANET_FUNC_TEMPLATE
+        argtype = "JanetFlCallback *"
+        jtype = "JANET_ABSTRACT"
+        jfunc = "janet_getabstract"
 
-    if type_kind == TypeKind.POINTER:
+    elif argtype == "void *":
+        template = PTR_TEMPLATE
+        jtype = "JANET_STRING"
+        jfunc = "janet_getcstring"
+
+    elif type_kind == TypeKind.POINTER:
         if argtype == "const char *":
             template = PTR_TEMPLATE
             jtype = "JANET_STRING"
@@ -95,6 +215,7 @@ def print_arg(N, arg):
         print(N, arg.spelling, arg.type.spelling)
         return None
 
+    N_next = N + 1
     table = {k: str(v) for k, v in vars().items()}
     result = template.format(**table)
     return result
@@ -159,9 +280,17 @@ def print_janet_function(c, defs):
 
     # cast all the args
     cargs = []
+    previous_arg = None
     for (i, arg) in enumerate(c.get_arguments()):
         cargs.append(f"arg{i}")
+
+        if arg.type.spelling == "void *" and previous_arg == "Fl_Callback *":
+            previous_arg = arg.type.spelling
+            print("@@@ skipping void* after Fl_Callback*")
+            continue
+
         res = print_arg(i, arg)
+        previous_arg = arg.type.spelling
         if res is None:
             print("unable to handle arg", arg.spelling, arg.type.spelling)
             return None
@@ -218,16 +347,24 @@ if __name__ == "__main__":
         sys.exit(1)
 
     with open(sys.argv[2], "w") as ofp:
+        ofp.write("#include <iostream>\n")
+        ofp.write("#include <string>\n")
         ofp.write("#include <janet.h>\n")
         ofp.write("#include <cfl.h>\n")
 
         headers = glob.glob(os.path.join(dirname, "*.h"))
-        # headers = ["cfltk/include/cfl.h", "cfltk/include/cfl_widget.h", "cfltk/include/cfl_window.h"]
+        headers = ["cfltk/include/cfl.h",
+                   "cfltk/include/cfl_button.h",
+                   "cfltk/include/cfl_widget.h",
+                   "cfltk/include/cfl_image.h",
+                   "cfltk/include/cfl_window.h"]
 
         for h in headers:
             basename = os.path.basename(h)
             if "_" in basename:
                 ofp.write(f"#include <{basename}>\n")
+
+        ofp.write(CALLBACK)
 
         for header in headers:
             print(header)
@@ -237,5 +374,6 @@ if __name__ == "__main__":
         JanetRegExt cfuns[] = {\n''')
         for cname in defs.keys():
             ofp.write(f'        JANET_REG("{defs[cname]}", {cname}),\n')
+        ofp.write('        JANET_REG("make_callback", cfun_new_fl_callback),\n')
         ofp.write("        JANET_REG_END\n    };\n")
         ofp.write('    janet_cfuns_ext(env, "jfltk", cfuns);\n}\n')

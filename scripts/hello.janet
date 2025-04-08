@@ -1,7 +1,10 @@
 (use ../_build/release/jfltk)
 
-(defn clicker [widget &opt data]
-  (Fl_Widget_set_label widget "Hello!"))
+(var count 0)
+
+(defn clicker [widget]
+  (set count (inc count))
+  (Fl_Widget_set_label widget (string/format "count: %d" count)))
 
 (Fl_init_all)
 (Fl_register_images)
@@ -13,6 +16,9 @@
 (Fl_Window_end w)
 (Fl_Window_show w)
 
-# (Fl_Button_set_callback b clicker)
+(def cb (make_callback clicker))
+(pp cb)
+
+(Fl_Button_set_callback b cb "")
 
 (Fl_run)
