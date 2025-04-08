@@ -122,7 +122,7 @@ TEMPLATE = '''
 JANET_FN(cfun_{name},
          "(jfltk/{name}{arg_string})",
          "") {{
-    janet_fixarity(argc, {len_args});'''
+    janet_fixarity(argc, {arity});'''
 
 ARG_TEMPLATE = '''    if (!janet_checktype(argv[{N}], {jtype})) {{
         janet_panicf("expected {argtype}, got %%q", argv[{N}]);
@@ -264,10 +264,25 @@ def print_janet_function(c, defs):
     if c.kind != CursorKind.FUNCTION_DECL:
         return result
     name = c.spelling
-    args = [(x.spelling, x.type.spelling) for x in c.get_arguments()]
-    arg_types = ",".join([x.type.spelling for x in c.get_arguments()])
+
+    input_args = [x for x in c.get_arguments()]
+    janet_args = []
+    arity = len(input_args)
+
+    # filter out void* after Fl_Callback*
+    previous_arg_type = None
+    for arg in input_args:
+        if previous_arg_type == "Fl_Callback *" and arg.type.spelling == "void *":
+            print("XXX skipping void* after Fl_Callback*")
+            arity -= 1
+        else:
+            janet_args.append(arg)
+        previous_arg_type = arg.type.spelling
+
+    args = [(x.spelling, x.type.spelling) for x in janet_args]
+    arg_types = ",".join([x.type.spelling for x in janet_args])
     arg_string = ""
-    len_args = len(args)
+    len_args = len(input_args)
     if len(args) > 0:
         arg_string = " " + " ".join([x[0] for x in args])
 
@@ -278,17 +293,12 @@ def print_janet_function(c, defs):
     if len(args) == 0:
         result += "    (void) argv;\n"
 
-    # cast all the args
     cargs = []
-    previous_arg = None
-    for (i, arg) in enumerate(c.get_arguments()):
+    for (i, arg) in enumerate(input_args):
         cargs.append(f"arg{i}")
 
-        if arg.type.spelling == "void *" and previous_arg == "Fl_Callback *":
-            previous_arg = arg.type.spelling
-            print("@@@ skipping void* after Fl_Callback*")
-            continue
-
+    # cast all the args
+    for (i, arg) in enumerate(janet_args):
         res = print_arg(i, arg)
         previous_arg = arg.type.spelling
         if res is None:

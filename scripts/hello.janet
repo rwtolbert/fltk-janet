@@ -19,6 +19,6 @@
 (def cb (make_callback clicker))
 (pp cb)
 
-(Fl_Button_set_callback b cb "")
+(Fl_Button_set_callback b cb)
 
 (Fl_run)

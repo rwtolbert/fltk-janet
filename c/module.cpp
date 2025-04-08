@@ -3630,9 +3630,9 @@ JANET_FN(cfun_Fl_Button_deimage,
 }
 
 JANET_FN(cfun_Fl_Button_set_callback,
-         "(jfltk/Fl_Button_set_callback   )",
+         "(jfltk/Fl_Button_set_callback  )",
          "") {
-    janet_fixarity(argc, 3);
+    janet_fixarity(argc, 2);
     if (!janet_checktype(argv[0], JANET_POINTER)) {
         janet_panicf("expected Fl_Button *, got %%q", argv[0]);
     }
@@ -5194,9 +5194,9 @@ JANET_FN(cfun_Fl_Check_Button_deimage,
 }
 
 JANET_FN(cfun_Fl_Check_Button_set_callback,
-         "(jfltk/Fl_Check_Button_set_callback   )",
+         "(jfltk/Fl_Check_Button_set_callback  )",
          "") {
-    janet_fixarity(argc, 3);
+    janet_fixarity(argc, 2);
     if (!janet_checktype(argv[0], JANET_POINTER)) {
         janet_panicf("expected Fl_Check_Button *, got %%q", argv[0]);
     }
@@ -6792,9 +6792,9 @@ JANET_FN(cfun_Fl_Radio_Button_deimage,
 }
 
 JANET_FN(cfun_Fl_Radio_Button_set_callback,
-         "(jfltk/Fl_Radio_Button_set_callback   )",
+         "(jfltk/Fl_Radio_Button_set_callback  )",
          "") {
-    janet_fixarity(argc, 3);
+    janet_fixarity(argc, 2);
     if (!janet_checktype(argv[0], JANET_POINTER)) {
         janet_panicf("expected Fl_Radio_Button *, got %%q", argv[0]);
     }
@@ -8390,9 +8390,9 @@ JANET_FN(cfun_Fl_Toggle_Button_deimage,
 }
 
 JANET_FN(cfun_Fl_Toggle_Button_set_callback,
-         "(jfltk/Fl_Toggle_Button_set_callback   )",
+         "(jfltk/Fl_Toggle_Button_set_callback  )",
          "") {
-    janet_fixarity(argc, 3);
+    janet_fixarity(argc, 2);
     if (!janet_checktype(argv[0], JANET_POINTER)) {
         janet_panicf("expected Fl_Toggle_Button *, got %%q", argv[0]);
     }
@@ -9988,9 +9988,9 @@ JANET_FN(cfun_Fl_Round_Button_deimage,
 }
 
 JANET_FN(cfun_Fl_Round_Button_set_callback,
-         "(jfltk/Fl_Round_Button_set_callback   )",
+         "(jfltk/Fl_Round_Button_set_callback  )",
          "") {
-    janet_fixarity(argc, 3);
+    janet_fixarity(argc, 2);
     if (!janet_checktype(argv[0], JANET_POINTER)) {
         janet_panicf("expected Fl_Round_Button *, got %%q", argv[0]);
     }
@@ -11586,9 +11586,9 @@ JANET_FN(cfun_Fl_Radio_Round_Button_deimage,
 }
 
 JANET_FN(cfun_Fl_Radio_Round_Button_set_callback,
-         "(jfltk/Fl_Radio_Round_Button_set_callback   )",
+         "(jfltk/Fl_Radio_Round_Button_set_callback  )",
          "") {
-    janet_fixarity(argc, 3);
+    janet_fixarity(argc, 2);
     if (!janet_checktype(argv[0], JANET_POINTER)) {
         janet_panicf("expected Fl_Radio_Round_Button *, got %%q", argv[0]);
     }
@@ -13184,9 +13184,9 @@ JANET_FN(cfun_Fl_Radio_Light_Button_deimage,
 }
 
 JANET_FN(cfun_Fl_Radio_Light_Button_set_callback,
-         "(jfltk/Fl_Radio_Light_Button_set_callback   )",
+         "(jfltk/Fl_Radio_Light_Button_set_callback  )",
          "") {
-    janet_fixarity(argc, 3);
+    janet_fixarity(argc, 2);
     if (!janet_checktype(argv[0], JANET_POINTER)) {
         janet_panicf("expected Fl_Radio_Light_Button *, got %%q", argv[0]);
     }
@@ -14782,9 +14782,9 @@ JANET_FN(cfun_Fl_Light_Button_deimage,
 }
 
 JANET_FN(cfun_Fl_Light_Button_set_callback,
-         "(jfltk/Fl_Light_Button_set_callback   )",
+         "(jfltk/Fl_Light_Button_set_callback  )",
          "") {
-    janet_fixarity(argc, 3);
+    janet_fixarity(argc, 2);
     if (!janet_checktype(argv[0], JANET_POINTER)) {
         janet_panicf("expected Fl_Light_Button *, got %%q", argv[0]);
     }
@@ -16380,9 +16380,9 @@ JANET_FN(cfun_Fl_Repeat_Button_deimage,
 }
 
 JANET_FN(cfun_Fl_Repeat_Button_set_callback,
-         "(jfltk/Fl_Repeat_Button_set_callback   )",
+         "(jfltk/Fl_Repeat_Button_set_callback  )",
          "") {
-    janet_fixarity(argc, 3);
+    janet_fixarity(argc, 2);
     if (!janet_checktype(argv[0], JANET_POINTER)) {
         janet_panicf("expected Fl_Repeat_Button *, got %%q", argv[0]);
     }
@@ -17944,9 +17944,9 @@ JANET_FN(cfun_Fl_Return_Button_deimage,
 }
 
 JANET_FN(cfun_Fl_Return_Button_set_callback,
-         "(jfltk/Fl_Return_Button_set_callback   )",
+         "(jfltk/Fl_Return_Button_set_callback  )",
          "") {
-    janet_fixarity(argc, 3);
+    janet_fixarity(argc, 2);
     if (!janet_checktype(argv[0], JANET_POINTER)) {
         janet_panicf("expected Fl_Return_Button *, got %%q", argv[0]);
     }
@@ -19508,9 +19508,9 @@ JANET_FN(cfun_Fl_Shortcut_Button_deimage,
 }
 
 JANET_FN(cfun_Fl_Shortcut_Button_set_callback,
-         "(jfltk/Fl_Shortcut_Button_set_callback   )",
+         "(jfltk/Fl_Shortcut_Button_set_callback  )",
          "") {
-    janet_fixarity(argc, 3);
+    janet_fixarity(argc, 2);
     if (!janet_checktype(argv[0], JANET_POINTER)) {
         janet_panicf("expected Fl_Shortcut_Button *, got %%q", argv[0]);
     }
@@ -21121,9 +21121,9 @@ JANET_FN(cfun_Fl_Widget_deimage,
 }
 
 JANET_FN(cfun_Fl_Widget_set_callback,
-         "(jfltk/Fl_Widget_set_callback   )",
+         "(jfltk/Fl_Widget_set_callback  )",
          "") {
-    janet_fixarity(argc, 3);
+    janet_fixarity(argc, 2);
     if (!janet_checktype(argv[0], JANET_POINTER)) {
         janet_panicf("expected Fl_Widget *, got %%q", argv[0]);
     }
@@ -27907,9 +27907,9 @@ JANET_FN(cfun_Fl_Window_deimage,
 }
 
 JANET_FN(cfun_Fl_Window_set_callback,
-         "(jfltk/Fl_Window_set_callback   )",
+         "(jfltk/Fl_Window_set_callback  )",
          "") {
-    janet_fixarity(argc, 3);
+    janet_fixarity(argc, 2);
     if (!janet_checktype(argv[0], JANET_POINTER)) {
         janet_panicf("expected Fl_Window *, got %%q", argv[0]);
     }
@@ -30512,9 +30512,9 @@ JANET_FN(cfun_Fl_Single_Window_deimage,
 }
 
 JANET_FN(cfun_Fl_Single_Window_set_callback,
-         "(jfltk/Fl_Single_Window_set_callback   )",
+         "(jfltk/Fl_Single_Window_set_callback  )",
          "") {
-    janet_fixarity(argc, 3);
+    janet_fixarity(argc, 2);
     if (!janet_checktype(argv[0], JANET_POINTER)) {
         janet_panicf("expected Fl_Single_Window *, got %%q", argv[0]);
     }
@@ -33011,9 +33011,9 @@ JANET_FN(cfun_Fl_Double_Window_deimage,
 }
 
 JANET_FN(cfun_Fl_Double_Window_set_callback,
-         "(jfltk/Fl_Double_Window_set_callback   )",
+         "(jfltk/Fl_Double_Window_set_callback  )",
          "") {
-    janet_fixarity(argc, 3);
+    janet_fixarity(argc, 2);
     if (!janet_checktype(argv[0], JANET_POINTER)) {
         janet_panicf("expected Fl_Double_Window *, got %%q", argv[0]);
     }
@@ -35525,9 +35525,9 @@ JANET_FN(cfun_Fl_Menu_Window_deimage,
 }
 
 JANET_FN(cfun_Fl_Menu_Window_set_callback,
-         "(jfltk/Fl_Menu_Window_set_callback   )",
+         "(jfltk/Fl_Menu_Window_set_callback  )",
          "") {
-    janet_fixarity(argc, 3);
+    janet_fixarity(argc, 2);
     if (!janet_checktype(argv[0], JANET_POINTER)) {
         janet_panicf("expected Fl_Menu_Window *, got %%q", argv[0]);
     }
@@ -38024,9 +38024,9 @@ JANET_FN(cfun_Fl_Overlay_Window_deimage,
 }
 
 JANET_FN(cfun_Fl_Overlay_Window_set_callback,
-         "(jfltk/Fl_Overlay_Window_set_callback   )",
+         "(jfltk/Fl_Overlay_Window_set_callback  )",
          "") {
-    janet_fixarity(argc, 3);
+    janet_fixarity(argc, 2);
     if (!janet_checktype(argv[0], JANET_POINTER)) {
         janet_panicf("expected Fl_Overlay_Window *, got %%q", argv[0]);
     }
@@ -40571,9 +40571,9 @@ JANET_FN(cfun_Fl_Gl_Window_deimage,
 }
 
 JANET_FN(cfun_Fl_Gl_Window_set_callback,
-         "(jfltk/Fl_Gl_Window_set_callback   )",
+         "(jfltk/Fl_Gl_Window_set_callback  )",
          "") {
-    janet_fixarity(argc, 3);
+    janet_fixarity(argc, 2);
     if (!janet_checktype(argv[0], JANET_POINTER)) {
         janet_panicf("expected Fl_Gl_Window *, got %%q", argv[0]);
     }
@@ -43434,9 +43434,9 @@ JANET_FN(cfun_Fl_Glut_Window_deimage,
 }
 
 JANET_FN(cfun_Fl_Glut_Window_set_callback,
-         "(jfltk/Fl_Glut_Window_set_callback   )",
+         "(jfltk/Fl_Glut_Window_set_callback  )",
          "") {
-    janet_fixarity(argc, 3);
+    janet_fixarity(argc, 2);
     if (!janet_checktype(argv[0], JANET_POINTER)) {
         janet_panicf("expected Fl_Glut_Window *, got %%q", argv[0]);
     }
