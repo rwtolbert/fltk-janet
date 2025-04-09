@@ -2,7 +2,7 @@
 
 (var count 0)
 
-(defn clicker [widget]
+(defn clicker [widget &opt data]
   (set count (inc count))
   (Fl_Widget_set_label widget (string/format "count: %d" count)))
 

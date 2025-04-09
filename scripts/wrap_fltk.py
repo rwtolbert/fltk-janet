@@ -259,32 +259,45 @@ def call_function(name, args, return_val):
 
     return result
 
+from dataclasses import dataclass
+
+@dataclass
+class Arg:
+    arg: clang.cindex.Cursor
+    name: str
+    argtype: str
+    num: int
+    skip: bool = False
+
+
 def print_janet_function(c, defs):
     result = None
     if c.kind != CursorKind.FUNCTION_DECL:
         return result
     name = c.spelling
 
-    input_args = [x for x in c.get_arguments()]
-    janet_args = []
-    arity = len(input_args)
+    arity = 0
+    args = []
+    for i, arg in enumerate(c.get_arguments()):
+        this_arg = Arg(arg=arg, name=arg.spelling, argtype=arg.type.spelling, num=i)
+        args.append(this_arg)
+        arity += 1
 
     # filter out void* after Fl_Callback*
     previous_arg_type = None
-    for arg in input_args:
-        if previous_arg_type == "Fl_Callback *" and arg.type.spelling == "void *":
+    for arg in args:
+        if previous_arg_type == "Fl_Callback *" and arg.argtype == "void *":
             print("XXX skipping void* after Fl_Callback*")
             arity -= 1
-        else:
-            janet_args.append(arg)
-        previous_arg_type = arg.type.spelling
+            arg.skip = True
+        previous_arg_type = arg.argtype
 
-    args = [(x.spelling, x.type.spelling) for x in janet_args]
-    arg_types = ",".join([x.type.spelling for x in janet_args])
+    arg_types = ",".join([x.argtype for x in args])
+
     arg_string = ""
-    len_args = len(input_args)
+    len_args = len(args)
     if len(args) > 0:
-        arg_string = " " + " ".join([x[0] for x in args])
+        arg_string = " " + " ".join([x.name for x in args])
 
     return_type = c.result_type.spelling
     table = {k: str(v) for k, v in vars().items()}
@@ -294,18 +307,18 @@ def print_janet_function(c, defs):
         result += "    (void) argv;\n"
 
     cargs = []
-    for (i, arg) in enumerate(input_args):
-        cargs.append(f"arg{i}")
+    for arg in args:
+        cargs.append(f"arg{arg.num}")
 
     # cast all the args
-    for (i, arg) in enumerate(janet_args):
-        res = print_arg(i, arg)
-        previous_arg = arg.type.spelling
-        if res is None:
-            print("unable to handle arg", arg.spelling, arg.type.spelling)
-            return None
-        else:
-            result += res
+    for arg in args:
+        if not arg.skip:
+            res = print_arg(arg.num, arg.arg)
+            if res is None:
+                print("unable to handle arg", arg.name, arg.argtype)
+                return None
+            else:
+                result += res
 
     # call the function
     res = call_function(name, cargs, return_type)
@@ -319,8 +332,8 @@ def print_janet_function(c, defs):
     # defs[name] = f"cfun_{name}"
     cname = f"cfun_{name}"
 
-    if cname.find("_set_callback") > 0:
-        print("CB", cname, res)
+    # if cname.find("_set_callback") > 0:
+    #     print("CB", cname, res)
 
     if cname not in defs.keys():
         defs[cname] = name
@@ -328,6 +341,28 @@ def print_janet_function(c, defs):
         print("Warning, duplicate function name", cname)
         return None
     return result
+
+
+def handle_enum(c):
+    print(c.spelling, c.kind)
+    first = True
+    initial_value = -1
+    for child in c.get_children():
+        # print("  -> ", child.spelling, child.kind)
+        val = None
+        for node in child.get_children():
+            parts = [x.spelling for x in node.get_tokens()]
+            val = "".join(parts)
+            if first:
+                initial_value = val
+                first = False
+        if val is None and initial_value is not None:
+            val = int(initial_value) + 1
+            initial_value = val
+        if val is None:
+            print(f"unable to handle enum: {child.spelling}")
+            sys.exit(1)
+        print(f"(def {child.spelling} {val})")
 
 
 def parse_header(fname, ofp, defs):
@@ -340,9 +375,8 @@ def parse_header(fname, ofp, defs):
             res = print_janet_function(c, defs)
             if res is not None and not "None" in res:
                 ofp.write(res)
-            # else:
-            #     print(res)
-
+        elif c.kind == CursorKind.ENUM_DECL:
+            handle_enum(c)
 
 if __name__ == "__main__":
     import glob
@@ -363,11 +397,13 @@ if __name__ == "__main__":
         ofp.write("#include <cfl.h>\n")
 
         headers = glob.glob(os.path.join(dirname, "*.h"))
-        headers = ["cfltk/include/cfl.h",
-                   "cfltk/include/cfl_button.h",
-                   "cfltk/include/cfl_widget.h",
-                   "cfltk/include/cfl_image.h",
-                   "cfltk/include/cfl_window.h"]
+        # headers = ["cfltk/include/cfl.h",
+        #            "cfltk/include/cfl_enums.h"
+        #            "cfltk/include/cfl_button.h",
+        #            "cfltk/include/cfl_widget.h",
+        #            "cfltk/include/cfl_image.h",
+        #            "cfltk/include/cfl_window.h"
+        # ]
 
         for h in headers:
             basename = os.path.basename(h)
