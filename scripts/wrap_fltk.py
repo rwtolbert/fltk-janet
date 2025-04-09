@@ -23,10 +23,15 @@ CALLBACK = '''
 class Callbacker {
 private:
     JanetFunction* _func = nullptr;
+    Janet _data;
 
 public:
-    explicit Callbacker(JanetFunction* fn) : _func(fn) {
+    Callbacker(JanetFunction* fn) : _func(fn) {
         std::cerr << "Callbacker ctor " << std::endl;
+        _data = janet_wrap_nil();
+    }
+    Callbacker(JanetFunction* fn, Janet data) : _func(fn), _data(data) {
+        std::cerr << "Callbacker ctor 2" << std::endl;
     }
     Callbacker() = delete;
     Callbacker(const Callbacker& rhs) = delete;
@@ -34,14 +39,24 @@ public:
     Callbacker& operator=(const Callbacker& rhs) = delete;
     Callbacker& operator=(const Callbacker&& rhs) = delete;
 
-    void static static_callback(Fl_Widget* w, void *data) {
-        static_cast<Callbacker*>(data)->callback(w);
+    void static static_fl_callback(Fl_Widget* w, void *data) {
+        static_cast<Callbacker*>(data)->fl_callback(w);
     }
-    void callback(Fl_Widget* w) {
-        std::cerr << "in callback " << std::endl;
-        Janet args[1] = { janet_wrap_pointer(w) };
+    void fl_callback(Fl_Widget* w) {
+        std::cerr << "in fl_callback " << std::endl;
+        Janet args[2] = { janet_wrap_pointer(w), _data };
         if (_func) {
-            janet_call(_func, 1, args);
+            janet_call(_func, 2, args);
+        }
+    }
+    void static static_custom_handler_callback(Fl_Widget* w, int x, void *data) {
+        static_cast<Callbacker*>(data)->custom_handler_callback(w, x);
+    }
+    void custom_handler_callback(Fl_Widget* w, int x) {
+        std::cerr << "in custom_handler_callback " << std::endl;
+        Janet args[2] = { janet_wrap_pointer(w), janet_wrap_integer(x) };
+        if (_func) {
+            janet_call(_func, 2, args);
         }
     }
     ~Callbacker() {
@@ -93,28 +108,39 @@ JanetFlCallback *new_abstract_callback(JanetFunction *fn, const Janet *argv,
                                        int32_t flag_start, int32_t argc) {
   initialize_callbacker_type();
   JanetFlCallback *cb = (JanetFlCallback *)janet_abstract(&callbacker_type, sizeof(Callbacker));
-  auto *callbacker = new Callbacker(fn);
+
+  Callbacker* callbacker = nullptr;
+  if (argc == 2) {
+    callbacker = new Callbacker(fn, argv[1]);
+  } else {
+    callbacker = new Callbacker(fn);
+  }
+
+//  auto *callbacker = new Callbacker(fn, data);
   cb->cb = callbacker;
   return cb;
 }
 
-JANET_FN(cfun_new_fl_callback, "(jfltk/new_fl_callback fn)", "Create new Fl_Callback") {
-    janet_fixarity(argc, 1);
+JANET_FN(cfun_new_fl_callback, "(jfltk/new_fl_callback fn &opt data)", "Create new Fl_Callback") {
+    janet_arity(argc, 1, 2);
     JanetFlCallback* cb = nullptr;
     if (!janet_checktype(argv[0], JANET_FUNCTION)) {
         janet_panicf("expected function, got %%q", argv[0]);
     }
     JanetFunction * jarg1 = (JanetFunction *)janet_getfunction(argv, 0);
-    cb = new_abstract_callback(jarg1, argv, 0, 0);
+
+    cb = new_abstract_callback(jarg1, argv, 1, argc);
     return janet_wrap_abstract(cb);
 }
 
-Fl_Callback* make_callback(Janet* f) {
+/*
+Fl_Callback* make_fl_callback(Janet* f, Janet* data) {
     auto func = janet_unwrap_function(*f);
     return [](Fl_Widget* w, void* data) {
         Fl_Widget_set_label(w, "Goodbye");
     };
 }
+*/
 
 '''
 
@@ -154,7 +180,7 @@ JANET_FUNC_TEMPLATE  = '''    if (!janet_checktype(argv[{N}], {jtype})) {{
     }}
     std::cerr << "make callback" << std::endl;
     // auto arg{N} = make_callback(jarg{N});
-    auto arg{N} = jarg{N}->cb->static_callback;
+    auto arg{N} = jarg{N}->cb->static_fl_callback;
     void* arg{N_next} = (void*)jarg{N}->cb;
 '''
 
@@ -398,7 +424,7 @@ if __name__ == "__main__":
 
         headers = glob.glob(os.path.join(dirname, "*.h"))
         # headers = ["cfltk/include/cfl.h",
-        #            "cfltk/include/cfl_enums.h"
+        #            "cfltk/include/cfl_enums.h",
         #            "cfltk/include/cfl_button.h",
         #            "cfltk/include/cfl_widget.h",
         #            "cfltk/include/cfl_image.h",

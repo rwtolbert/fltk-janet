@@ -4,6 +4,8 @@
 
 (defn clicker [widget &opt data]
   (set count (inc count))
+  (when (not (nil? data))
+    (Fl_Window_set_label data "it worked"))
   (Fl_Widget_set_label widget (string/format "count: %d" count)))
 
 (Fl_init_all)
@@ -16,7 +18,8 @@
 (Fl_Window_end w)
 (Fl_Window_show w)
 
-(def cb (make_callback clicker))
+(def cb (make_callback clicker w))
+
 (pp cb)
 
 (Fl_Button_set_callback b cb)
