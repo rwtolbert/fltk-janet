@@ -28,7 +28,7 @@ ${LOCAL_JANET_LIB}:
 
 .PHONY: cfltk
 cfltk:
-	cmake -B cfltk-build -S cfltk -G "Unix Makefiles" -DCFLTK_USE_OPENGL=ON
+	cmake -B cfltk-build -S cfltk -G "Unix Makefiles" -DCFLTK_USE_OPENGL=ON -DFLTK_BUILD_EXAMPLES=ON
 	cd cfltk-build && make -j
 
 .PHONY: deps
@@ -38,6 +38,7 @@ deps: ${LOCAL_JANET_LIB}
 .PHONY: build
 build: deps
 	@$(JANET_PM) build
+	@cp -c _build/release/jfltk.so fltk-janet/
 
 # .PHONY: man
 # man:

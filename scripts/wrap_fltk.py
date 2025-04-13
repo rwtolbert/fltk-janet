@@ -27,11 +27,9 @@ private:
 
 public:
     Callbacker(JanetFunction* fn) : _func(fn) {
-        std::cerr << "Callbacker ctor " << std::endl;
         _data = janet_wrap_nil();
     }
     Callbacker(JanetFunction* fn, Janet data) : _func(fn), _data(data) {
-        std::cerr << "Callbacker ctor 2" << std::endl;
     }
     Callbacker() = delete;
     Callbacker(const Callbacker& rhs) = delete;
@@ -43,26 +41,34 @@ public:
         static_cast<Callbacker*>(data)->fl_callback(w);
     }
     void fl_callback(Fl_Widget* w) {
-        std::cerr << "in fl_callback " << std::endl;
         Janet args[2] = { janet_wrap_pointer(w), _data };
         if (_func) {
             janet_call(_func, 2, args);
         }
     }
-    void static static_custom_handler_callback(Fl_Widget* w, int x, void *data) {
-        static_cast<Callbacker*>(data)->custom_handler_callback(w, x);
+    int static static_custom_handler_callback(Fl_Widget* w, int x, void *data) {
+        return static_cast<Callbacker*>(data)->custom_handler_callback(w, x);
     }
-    void custom_handler_callback(Fl_Widget* w, int x) {
-        std::cerr << "in custom_handler_callback " << std::endl;
-        Janet args[2] = { janet_wrap_pointer(w), janet_wrap_integer(x) };
+    int custom_handler_callback(Fl_Widget* w, int x) {
+        Janet args[3] = { janet_wrap_pointer(w), janet_wrap_integer(x), _data };
         if (_func) {
-            janet_call(_func, 2, args);
+            return janet_unwrap_integer(janet_call(_func, 3, args));
+        }
+        return 0;
+    }
+    static void static_timer_callback(void *data) {
+        static_cast<Callbacker*>(data)->timer_callback();
+    }
+    void timer_callback() {
+        Janet args[1] = { _data };
+        if (_func) {
+            janet_call(_func, 1, args);
         }
     }
+
     ~Callbacker() {
         if (_func)
             janet_mark(janet_wrap_function(_func));
-        std::cerr << "Callbacker dtor " << std::endl;
     }
 };
 
@@ -125,7 +131,7 @@ JANET_FN(cfun_new_fl_callback, "(jfltk/new_fl_callback fn &opt data)", "Create n
     janet_arity(argc, 1, 2);
     JanetFlCallback* cb = nullptr;
     if (!janet_checktype(argv[0], JANET_FUNCTION)) {
-        janet_panicf("expected function, got %%q", argv[0]);
+        janet_panicf("expected function, got %q", argv[0]);
     }
     JanetFunction * jarg1 = (JanetFunction *)janet_getfunction(argv, 0);
 
@@ -133,14 +139,29 @@ JANET_FN(cfun_new_fl_callback, "(jfltk/new_fl_callback fn &opt data)", "Create n
     return janet_wrap_abstract(cb);
 }
 
-/*
-Fl_Callback* make_fl_callback(Janet* f, Janet* data) {
-    auto func = janet_unwrap_function(*f);
-    return [](Fl_Widget* w, void* data) {
-        Fl_Widget_set_label(w, "Goodbye");
-    };
+JANET_FN(cfun_new_custom_callback, "(jfltk/new_custom_callback fn &opt data)", "Create new custom_handlder_callback") {
+    janet_arity(argc, 1, 2);
+    JanetFlCallback* cb = nullptr;
+    if (!janet_checktype(argv[0], JANET_FUNCTION)) {
+        janet_panicf("expected function, got %q", argv[0]);
+    }
+    JanetFunction * jarg1 = (JanetFunction *)janet_getfunction(argv, 0);
+
+    cb = new_abstract_callback(jarg1, argv, 1, argc);
+    return janet_wrap_abstract(cb);
 }
-*/
+
+JANET_FN(cfun_new_timer_callback, "(jfltk/new_timer_callback fn &opt data)", "Create new custom_handlder_callback") {
+    janet_arity(argc, 1, 2);
+    JanetFlCallback* cb = nullptr;
+    if (!janet_checktype(argv[0], JANET_FUNCTION)) {
+        janet_panicf("expected function, got %q", argv[0]);
+    }
+    JanetFunction * jarg1 = (JanetFunction *)janet_getfunction(argv, 0);
+
+    cb = new_abstract_callback(jarg1, argv, 1, argc);
+    return janet_wrap_abstract(cb);
+}
 
 '''
 
@@ -151,19 +172,13 @@ JANET_FN(cfun_{name},
     janet_fixarity(argc, {arity});'''
 
 ARG_TEMPLATE = '''    if (!janet_checktype(argv[{N}], {jtype})) {{
-        janet_panicf("expected {argtype}, got %%q", argv[{N}]);
+        janet_panicf("expected {argtype}, got %q", argv[{N}]);
     }}
     {argtype} arg{N} = {jfunc}(argv, {N});
 '''
 
-# FUNCPTR_TEMPLATE = '''    if (!janet_checktype(argv[{N}], {jtype})) {{
-#         janet_panicf("expected {argtype}, got %%q", argv[{N}]);
-#     }}
-#     {argtype} arg{N} = {jfunc}(argv, {N});
-# '''
-
 PTR_TEMPLATE  = '''    if (!janet_checktype(argv[{N}], {jtype})) {{
-        janet_panicf("expected {argtype}, got %%q", argv[{N}]);
+        janet_panicf("expected {argtype}, got %q", argv[{N}]);
     }}
     {argtype} arg{N} = ({argtype}){jfunc}(argv, {N});
     if (!arg{N}) {{
@@ -171,16 +186,39 @@ PTR_TEMPLATE  = '''    if (!janet_checktype(argv[{N}], {jtype})) {{
     }}
 '''
 
+JANET_TEMPLATE = '''   void * arg{N} = (void *)(&argv[{N}]);\n'''
+
 JANET_FUNC_TEMPLATE  = '''    if (!janet_checktype(argv[{N}], {jtype})) {{
-        janet_panicf("expected {argtype}, got %%q", argv[{N}]);
+        janet_panicf("expected {argtype}, got %q", argv[{N}]);
     }}
     {argtype} jarg{N} = ({argtype}){jfunc}(argv, {N}, &callbacker_type);
     if (!jarg{N}) {{
         janet_panicf("expected {argtype}, got nil");
     }}
-    std::cerr << "make callback" << std::endl;
     // auto arg{N} = make_callback(jarg{N});
     auto arg{N} = jarg{N}->cb->static_fl_callback;
+    void* arg{N_next} = (void*)jarg{N}->cb;
+'''
+
+CUSTOM_HANDLER_TEMPLATE  = '''    if (!janet_checktype(argv[{N}], {jtype})) {{
+        janet_panicf("expected {argtype}, got %q", argv[{N}]);
+    }}
+    {argtype} jarg{N} = ({argtype}){jfunc}(argv, {N}, &callbacker_type);
+    if (!jarg{N}) {{
+        janet_panicf("expected {argtype}, got nil");
+    }}
+    auto arg{N} = jarg{N}->cb->static_custom_handler_callback;
+    void* arg{N_next} = (void*)jarg{N}->cb;
+'''
+
+TIMER_TEMPLATE  = '''    if (!janet_checktype(argv[{N}], {jtype})) {{
+        janet_panicf("expected {argtype}, got %q", argv[{N}]);
+    }}
+    {argtype} jarg{N} = ({argtype}){jfunc}(argv, {N}, &callbacker_type);
+    if (!jarg{N}) {{
+        janet_panicf("expected {argtype}, got nil");
+    }}
+    auto arg{N} = jarg{N}->cb->static_timer_callback;
     void* arg{N_next} = (void*)jarg{N}->cb;
 '''
 
@@ -205,10 +243,20 @@ def print_arg(N, arg):
         jtype = "JANET_ABSTRACT"
         jfunc = "janet_getabstract"
 
+    elif argtype == "custom_handler_callback":
+        template = CUSTOM_HANDLER_TEMPLATE
+        argtype = "JanetFlCallback *"
+        jtype = "JANET_ABSTRACT"
+        jfunc = "janet_getabstract"
+
+    elif argtype == "void (*)(void *)":
+        template = TIMER_TEMPLATE
+        argtype = "JanetFlCallback *"
+        jtype = "JANET_ABSTRACT"
+        jfunc = "janet_getabstract"
+
     elif argtype == "void *":
-        template = PTR_TEMPLATE
-        jtype = "JANET_STRING"
-        jfunc = "janet_getcstring"
+        template = JANET_TEMPLATE
 
     elif type_kind == TypeKind.POINTER:
         if argtype == "const char *":
@@ -220,24 +268,28 @@ def print_arg(N, arg):
             jtype = "JANET_POINTER"
             jfunc = "janet_getpointer"
         else:
-            print(" ** UNKNOWN POINTER TYPE", type_kind, argtype)
+            # print(" ** UNKNOWN POINTER TYPE", type_kind, argtype)
             return None
     elif type_kind == TypeKind.INT:
         jtype = "JANET_NUMBER"
         jfunc = "janet_getinteger"
-    elif argtype in ["float", "double", "unsigned int", "unsigned char", "char", "unsigned short"]:
+    elif argtype in ["float", "double",
+                     "unsigned int", "const unsigned int",
+                     "unsigned char", "char",
+                     "unsigned short", "unsigned long",
+                     "const unsigned long" ]:
         jtype = "JANET_NUMBER"
         jfunc = "janet_getnumber"
     elif type_kind == TypeKind.ELABORATED:
         # if arg.is_definition():
         #     sys.stderr.write("%s %s %s\n" % (arg.spelling, arg.type.spelling, arg.result_type.kind,))
-        print(" ** UNKNOWN type", type_kind, arg.type.spelling)
+        # print(" ** UNKNOWN type", type_kind, arg.type.spelling)
         return None
         # template = PTR_TEMPLATE
         # jtype = "JANET_POINTER"
         # jfunc = "janet_getpointer"
     else:
-        print(" ** UNKNOWN type", type_kind, arg.type.spelling)
+        # print(" ** UNKNOWN type", type_kind, arg.type.spelling)
         print(N, arg.spelling, arg.type.spelling)
         return None
 
@@ -261,7 +313,7 @@ def call_function(name, args, return_val):
         return result
     elif return_val == "int":
         wrap_func = "janet_wrap_integer"
-    elif return_val in ["unsigned int", "unsigned char", "char", "float", "double", "unsigned short"]:
+    elif return_val in ["unsigned int", "unsigned char", "char", "float", "double", "unsigned short", "unsigned long"]:
         wrap_func = "janet_wrap_number"
     elif return_val == "const char *":
         wrap_func = "janet_cstringv"
@@ -312,8 +364,7 @@ def print_janet_function(c, defs):
     # filter out void* after Fl_Callback*
     previous_arg_type = None
     for arg in args:
-        if previous_arg_type == "Fl_Callback *" and arg.argtype == "void *":
-            print("XXX skipping void* after Fl_Callback*")
+        if previous_arg_type in ["Fl_Callback *", "custom_handler_callback", "void (*)(void *)"] and arg.argtype == "void *":
             arity -= 1
             arg.skip = True
         previous_arg_type = arg.argtype
@@ -355,11 +406,7 @@ def print_janet_function(c, defs):
 
     result += "\n}\n"
 
-    # defs[name] = f"cfun_{name}"
     cname = f"cfun_{name}"
-
-    # if cname.find("_set_callback") > 0:
-    #     print("CB", cname, res)
 
     if cname not in defs.keys():
         defs[cname] = name
@@ -369,29 +416,47 @@ def print_janet_function(c, defs):
     return result
 
 
-def handle_enum(c):
-    print(c.spelling, c.kind)
+def to_int(x):
+    val = x
+    if type(x) == str:
+        if x.find("|") >= 0:
+            parts = x.split("|")
+            val = 0
+            for p in parts:
+                val |= to_int(p)
+        elif x.find("+") >= 0:
+            parts = x.split("+")
+            val = 0
+            for p in parts:
+                val |= to_int(p)
+    if type(val) == str and val.startswith("0x"):
+        return int(val, 0)
+    else:
+        return int(val)
+
+
+def handle_enum(c, ofp):
+    # print(c.spelling, c.kind)
     first = True
     initial_value = -1
     for child in c.get_children():
-        # print("  -> ", child.spelling, child.kind)
         val = None
         for node in child.get_children():
             parts = [x.spelling for x in node.get_tokens()]
             val = "".join(parts)
             if first:
-                initial_value = val
+                initial_value = to_int(val)
                 first = False
         if val is None and initial_value is not None:
-            val = int(initial_value) + 1
+            val = to_int(initial_value) + 1
             initial_value = val
         if val is None:
             print(f"unable to handle enum: {child.spelling}")
             sys.exit(1)
-        print(f"(def {child.spelling} {val})")
+        ofp.write(f"(def {child.spelling} {to_int(val)})\n")
 
 
-def parse_header(fname, ofp, defs):
+def parse_header(fname, ofp, defs, enums):
     args = f"-c++-11 -I{dirname}/../cfltk/include".split()
     # print(args)
     idx = clang.cindex.Index.create()
@@ -402,7 +467,7 @@ def parse_header(fname, ofp, defs):
             if res is not None and not "None" in res:
                 ofp.write(res)
         elif c.kind == CursorKind.ENUM_DECL:
-            handle_enum(c)
+            handle_enum(c, enums)
 
 if __name__ == "__main__":
     import glob
@@ -416,20 +481,13 @@ if __name__ == "__main__":
         print("usage: wrap_fltk.py <dirname> <outfile>")
         sys.exit(1)
 
-    with open(sys.argv[2], "w") as ofp:
+    with open(sys.argv[2], "w") as ofp, open("fltk-janet/enums.janet", "w") as enums:
         ofp.write("#include <iostream>\n")
         ofp.write("#include <string>\n")
         ofp.write("#include <janet.h>\n")
         ofp.write("#include <cfl.h>\n")
 
         headers = glob.glob(os.path.join(dirname, "*.h"))
-        # headers = ["cfltk/include/cfl.h",
-        #            "cfltk/include/cfl_enums.h",
-        #            "cfltk/include/cfl_button.h",
-        #            "cfltk/include/cfl_widget.h",
-        #            "cfltk/include/cfl_image.h",
-        #            "cfltk/include/cfl_window.h"
-        # ]
 
         for h in headers:
             basename = os.path.basename(h)
@@ -440,12 +498,14 @@ if __name__ == "__main__":
 
         for header in headers:
             print(header)
-            parse_header(os.path.abspath(header), ofp, defs)
+            parse_header(os.path.abspath(header), ofp, defs, enums)
 
         ofp.write('''JANET_MODULE_ENTRY(JanetTable *env) {
         JanetRegExt cfuns[] = {\n''')
         for cname in defs.keys():
             ofp.write(f'        JANET_REG("{defs[cname]}", {cname}),\n')
         ofp.write('        JANET_REG("make_callback", cfun_new_fl_callback),\n')
+        ofp.write('        JANET_REG("make_custom_callback", cfun_new_custom_callback),\n')
+        ofp.write('        JANET_REG("make_timer_callback", cfun_new_timer_callback),\n')
         ofp.write("        JANET_REG_END\n    };\n")
         ofp.write('    janet_cfuns_ext(env, "jfltk", cfuns);\n}\n')
