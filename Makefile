@@ -3,21 +3,28 @@ LOCAL_JANET_LIB=${LOCAL_JANET}/lib
 export JANET_PATH=${LOCAL_JANET_LIB}
 
 ifeq ($(OS),Windows_NT)
-# SHELL := powershell.exe
-# .SHELLFLAGS := -NoProfile -Command
-PREFIX=${HOME}
-JANET_PM=${HOME}\\AppData\\Local\\Apps\\Janet\\Library\\bin\\janet-pm
-MD=powershell.exe -NoProfile -Command mkdir -force
-RM=powershell.exe -NoProfile -Command rm -r -force
-CP=powershell.exe -NoProfile -Command cp
-EXE=".exe"
+	# SHELL := powershell.exe
+	# .SHELLFLAGS := -NoProfile -Command
+	PREFIX=${HOME}
+	JANET_PM=${HOME}\\AppData\\Local\\Apps\\Janet\\Library\\bin\\janet-pm
+	MD=powershell.exe -NoProfile -Command mkdir -force
+	RM=powershell.exe -NoProfile -Command rm -r -force
+	CP=powershell.exe -NoProfile -Command cp
+	EXE=".exe"
 else
-PREFIX?=/usr/local
-JANET_PM=$(HOME)/dev/janet/lib/janet/bin/janet-pm
-MD=mkdir -p
-RM=rm -rf
-CP=cp
-EXE=""
+	UNAME_S := $(shell uname -s)
+	ifeq ($(UNAME_S),Linux)
+		CP=cp
+		FLTK_FLAGS=-DCFLTK_USE_FPIC=ON -DFLTK_USE_SYSTEM_LIBJPEG=OFF -DFLTK_USE_SYSTEM_LIBPNG=OFF -DFLTK_USE_SYSTEM_ZLIB=OFF
+	else
+		CP=cp -c
+		FLTK_FLAGS=-DFLTK_USE_SYSTEM_LIBJPEG=OFF -DFLTK_USE_SYSTEM_LIBPNG=OFF -DFLTK_USE_SYSTEM_ZLIB=OFF
+	endif
+	PREFIX?=/usr/local
+	JANET_PM=$(HOME)/dev/janet/lib/bin/janet-pm
+	MD=mkdir -p
+	RM=rm -rf
+	EXE=""
 endif
 
 .PHONY: default
@@ -28,7 +35,7 @@ ${LOCAL_JANET_LIB}:
 
 .PHONY: cfltk
 cfltk:
-	cmake -B cfltk-build -S cfltk -G "Unix Makefiles" -DCFLTK_USE_OPENGL=ON -DFLTK_BUILD_EXAMPLES=ON
+	cmake -B cfltk-build -S cfltk -G "Unix Makefiles" -DCFLTK_USE_OPENGL=ON -DFLTK_BUILD_EXAMPLES=ON ${FLTK_FLAGS}
 	cd cfltk-build && make -j
 
 .PHONY: deps
@@ -38,18 +45,7 @@ deps: ${LOCAL_JANET_LIB}
 .PHONY: build
 build: deps
 	@$(JANET_PM) build
-	@cp -c _build/release/jfltk.so fltk-janet/
-
-# .PHONY: man
-# man:
-# 	@janet scripts/make_manpage.janet
-
-# .PHONY: install
-# install: build man
-# 	${MD} $(PREFIX)/bin
-# 	${CP} _build/release/jdg${EXE} $(PREFIX)/bin
-# 	${MD} $(PREFIX)/man/man1
-# 	${CP} jdg.1 $(PREFIX)/man/man1
+	@${CP} _build/release/jfltk.so fltk-janet/
 
 .PHONY: clean
 clean:
