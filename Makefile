@@ -11,6 +11,8 @@ ifeq ($(OS),Windows_NT)
 	RM=powershell.exe -NoProfile -Command rm -r -force
 	CP=powershell.exe -NoProfile -Command cp
 	EXE=".exe"
+	FLTK_FLAGS=-DFLTK_USE_SYSTEM_LIBJPEG=OFF -DFLTK_USE_SYSTEM_LIBPNG=OFF -DFLTK_USE_SYSTEM_ZLIB=OFF
+	DLL=".dll"
 else
 	UNAME_S := $(shell uname -s)
 	ifeq ($(UNAME_S),Linux)
@@ -25,6 +27,7 @@ else
 	MD=mkdir -p
 	RM=rm -rf
 	EXE=""
+	DLL=".so"
 endif
 
 .PHONY: default
@@ -35,7 +38,7 @@ ${LOCAL_JANET_LIB}:
 
 .PHONY: cfltk
 cfltk:
-	cmake -B cfltk-build -S cfltk -G "Unix Makefiles" -DCFLTK_USE_OPENGL=ON -DFLTK_BUILD_EXAMPLES=ON ${FLTK_FLAGS}
+	cmake -B cfltk-build -S cfltk -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCFLTK_USE_OPENGL=ON -DFLTK_BUILD_EXAMPLES=OFF ${FLTK_FLAGS}
 	cd cfltk-build && make -j
 
 .PHONY: deps
@@ -45,7 +48,7 @@ deps: ${LOCAL_JANET_LIB}
 .PHONY: build
 build: deps
 	@$(JANET_PM) build
-	@${CP} _build/release/jfltk.so fltk-janet/
+	@${CP} _build/release/jfltk${DLL} fltk-janet/
 
 .PHONY: clean
 clean:

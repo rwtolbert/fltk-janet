@@ -4,4 +4,5 @@ build/
 bundle/
 local_janet_deps/
 jfltk.so
+jfltk.dll
 .venv

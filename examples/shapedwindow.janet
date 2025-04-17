@@ -9,22 +9,22 @@
 
 (defn shrink [w data]
   (def win (Fl_Widget_window w))
-  (def old  (Fl_Window_decorated_w win))
+  (def old (Fl_Window_decorated_w win))
   (def new-dim (div old factor))
   (def x (Fl_Window_x_root win))
   (def y (Fl_Window_y_root win))
   (Fl_Widget_resize win x y new-dim new-dim)
   (when (< (Fl_Window_decorated_w win) data)
-    (Fl_Widget_deactivate w)))
+    (Fl_Button_deactivate w)))
 
-(defn enlarge [w data]
+(defn enlarge [w shrink-button]
   (def win (Fl_Widget_window w))
-  (def old  (Fl_Window_decorated_w win))
+  (def old (Fl_Window_decorated_w win))
   (def new-dim (math/floor (* old factor)))
   (def x (Fl_Window_x_root win))
   (def y (Fl_Window_y_root win))
   (Fl_Widget_resize win x y new-dim new-dim)
-  (Fl_Widget_activate w))
+  (Fl_Button_activate shrink-button))
 
 (defn prepare-shape [dim]
   (def surf (Fl_Image_Surface_new dim dim 0))
@@ -56,7 +56,7 @@
   (def button_cb (make_callback cb b))
   (Fl_Button_set_callback b button_cb)
   (Fl_Group_end g)
-  (Fl_Group_resizable g nil)
+  (Fl_Group_resizable g g)
 
   (def g2 (Fl_Group_new 60 70 80 40 "Drag me"))
   (Fl_Group_set_box g2 Fl_BoxType_NoBox)
@@ -66,10 +66,10 @@
   (Fl_Button_set_callback bs shrink_cb)
 
   (def be (Fl_Button_new 60 90 80 20 "Enlarge"))
-  (def enlarge_cb (make_callback enlarge dim))
+  (def enlarge_cb (make_callback enlarge bs))
   (Fl_Button_set_callback be enlarge_cb)
   (Fl_Group_end g2)
-  (Fl_Group_resizable g2 nil)
+  (Fl_Group_resizable g2 g2)
 
   (Fl_Double_Window_end win)
   (Fl_Double_Window_resizable win win)
