@@ -39,12 +39,16 @@
 (def fltk-flags @["-DFLTK_USE_SYSTEM_LIBJPEG=OFF" "-DFLTK_USE_SYSTEM_LIBPNG=OFF" "-DFLTK_USE_SYSTEM_ZLIB=OFF"])
 (def cfltk-flags @["-B" cfltk-build-dir "-S" "cfltk" "-G" "Ninja" "-DCMAKE_BUILD_TYPE=Release" "-DCFLTK_USE_OPENGL=ON" "-DFLTK_BUILD_EXAMPLES=OFF"])
 
+(when (= (os/which) :linux)
+  (array/push fltk-flags "-DCFLTK_USE_FPIC=ON"))
+
 (def cmake-flags (array/concat cfltk-flags fltk-flags))
 (def cmake-build-flags @["--build" cfltk-build-dir "--parallel" "--config" "Release"])
 
 (defn build-cfltk []
   (unless (sh/exists? (string/format "%s/%s" cfltk-build-dir cfltk-lib))
-    (cmake ;cmake-flags)
+    (unless (sh/exists? (string/format "%s/%s" cfltk-build-dir "build.ninja"))
+      (cmake ;cmake-flags))
     (cmake ;cmake-build-flags)))
 
 (set-command "cmake" *cmakepath*)

@@ -18,7 +18,7 @@
     (set fltk-lib-path (string/format "/LIBPATH:./_build/%s/cfltk-build/fltk/lib" build-type)))
   (do
     (set cfltk-lib-path (string/format "-L./_build/%s/cfltk-build" build-type))
-    (set fltk-lib-path (string/format "-L./_build/%s/cfltk-build" build-type))))
+    (set fltk-lib-path (string/format "-L./_build/%s/cfltk-build/fltk/lib" build-type))))
 
 (declare-source
   :source ["fltk-janet"])
