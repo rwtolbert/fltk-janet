@@ -1,0 +1,6 @@
+@{:author "Bob Tolbert "
+  :dependencies @["spork"]
+  :description "Janet wrapper for FLTK"
+  :jpm-dependencies @["spork"]
+  :name "fltk-janet"
+  :version "0.1.0"}
