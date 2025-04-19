@@ -1,5 +1,5 @@
-(use ../fltk-janet/jfltk)
-(use ../fltk-janet/enums)
+(use fltk/widgets)
+(use fltk/constants)
 
 (def *WIDTH* 600)
 (def *HEIGHT* 400)

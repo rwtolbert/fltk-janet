@@ -525,17 +525,19 @@ def parse_header(fname, ofp, defs, enums):
 
 if __name__ == "__main__":
     import glob
-    if len(sys.argv) < 3:
-        print("usage: wrap_fltk.py <dirname> <outfile>")
-        sys.exit(0)
+
+    parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    print(parent_dir)
 
     defs = dict()
-    dirname = sys.argv[1]
+    dirname = os.path.join(parent_dir, "cfltk/include")
     if not os.path.isdir(dirname):
-        print("usage: wrap_fltk.py <dirname> <outfile>")
+        print("usage: wrap_fltk.py")
         sys.exit(1)
 
-    with open(sys.argv[2], "w") as ofp, open("fltk-janet/enums.janet", "w") as enums:
+    module_file = os.path.join(parent_dir, "c/module.cpp")
+    constants_file = os.path.join(parent_dir, "fltk/constants.janet")
+    with open(module_file, "w") as ofp, open(constants_file, "w") as enums:
         ofp.write("#include <iostream>\n")
         ofp.write("#include <string>\n")
         ofp.write("#include <janet.h>\n")

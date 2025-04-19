@@ -23,7 +23,7 @@ else
 		FLTK_FLAGS=-DFLTK_USE_SYSTEM_LIBJPEG=OFF -DFLTK_USE_SYSTEM_LIBPNG=OFF -DFLTK_USE_SYSTEM_ZLIB=OFF
 	endif
 	PREFIX?=/usr/local
-	JANET_PM=$(HOME)/dev/janet/lib/bin/janet-pm
+	JANET_PM=$(HOME)/dev/janet/lib/janet/bin/janet-pm
 	MD=mkdir -p
 	RM=rm -rf
 	EXE=""

@@ -21,7 +21,7 @@
     (set fltk-lib-path (string/format "-L./_build/%s/cfltk-build/fltk/lib" build-type))))
 
 (declare-source
-  :source ["fltk-janet"])
+  :source ["fltk"])
 
 (var cppflags nil)
 (var lflags nil)
@@ -33,8 +33,8 @@
                            "glu32.lib" "opengl32.lib" "ole32.lib" "uuid.lib" "comctl32.lib" "gdi32.lib" "gdiplus.lib" "user32.lib" "shell32.lib" "comdlg32.lib" "ws2_32.lib" "winspool.lib"]))
   :macos (do
            (set cppflags @["-I./cfltk/include" "-DCFLTK_USE_GL"])
-           (set lflags @[cfltk-lib-path "-lcfltk2" fltk-lib-path
-                         "-lfltk_images" "-lfltk_forms" "-lfltk_gl" "-lfltk_png" "-lfltk_jpeg" "-lfltk_z"
+           (set lflags @[cfltk-lib-path "-lcfltk2" fltk-lib-path "-lfltk"
+                         "-lfltk_images" "-lfltk_forms" "-lfltk_gl""-lfltk_png" "-lfltk_jpeg" "-lfltk_z"
                          "-framework" "Cocoa" "-framework" "OpenGL" "-weak_framework" "ScreenCaptureKit" "-weak_framework" "UniformTypeIdentifiers"]))
   :linux (do
            (set cppflags @["-fPIC" "-I./cfltk/include" "-DCFLTK_USE_GL"])
@@ -43,7 +43,7 @@
                          "-lm" "-lX11" "-lXext" "-lpthread" "-lXrender" "-lfontconfig" "-ldl"])))
 
 (declare-native
-  :name "jfltk"
+  :name "fltk/widgets"
   :source @["c/module.cpp"]
   :c++flags cppflags
   :lflags lflags)
