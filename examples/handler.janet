@@ -1,4 +1,4 @@
-(use fltk)
+(use jfltk)
 
 (defn clicker [widget event &opt obj]
   (case event

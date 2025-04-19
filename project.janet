@@ -21,7 +21,7 @@
     (set fltk-lib-path (string/format "-L./_build/%s/cfltk-build/fltk/lib" build-type))))
 
 (declare-source
-  :source ["fltk"])
+  :source ["jfltk"])
 
 (var cppflags nil)
 (var lflags nil)
@@ -43,7 +43,7 @@
                          "-lm" "-lX11" "-lXext" "-lpthread" "-lXrender" "-lfontconfig" "-ldl"])))
 
 (declare-native
-  :name "fltk/widgets"
+  :name "jfltk/widgets"
   :source @["c/module.cpp"]
   :c++flags cppflags
   :lflags lflags)
