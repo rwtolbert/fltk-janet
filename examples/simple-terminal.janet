@@ -1,5 +1,5 @@
-(use ../fltk-janet/jfltk)
-(use ../fltk-janet/enums)
+(use fltk/widgets)
+(use fltk/constants)
 
 (Fl_init_all)
 (Fl_register_images)

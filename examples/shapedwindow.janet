@@ -1,5 +1,5 @@
-(use ../fltk-janet/jfltk)
-(use ../fltk-janet/enums)
+(use fltk/widgets)
+(use fltk/constants)
 
 (def dim 200)
 (def factor 1.3)

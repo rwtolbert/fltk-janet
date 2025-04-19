@@ -1,5 +1,5 @@
-(use ../fltk-janet/jfltk)
-(use ../fltk-janet/enums)
+(use fltk/widgets)
+(use fltk/constants)
 
 (defn main [&]
   (Fl_init_all)
