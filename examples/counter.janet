@@ -1,5 +1,4 @@
-(use fltk/widgets)
-(use fltk/constants)
+(use fltk)
 
 (def *WIDTH* 600)
 (def *HEIGHT* 400)

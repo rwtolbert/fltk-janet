@@ -1,5 +1,4 @@
-(use fltk/widgets)
-(use fltk/constants)
+(use fltk)
 
 (Fl_init_all)
 (Fl_register_images)

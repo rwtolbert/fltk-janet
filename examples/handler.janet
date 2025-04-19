@@ -1,5 +1,4 @@
-(use fltk/widgets)
-(use fltk/constants)
+(use fltk)
 
 (defn clicker [widget event &opt obj]
   (case event

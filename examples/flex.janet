@@ -1,5 +1,4 @@
-(use fltk/widgets)
-(use fltk/constants)
+(use fltk)
 
 (defn main [&]
   (Fl_init_all)

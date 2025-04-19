@@ -1,8 +1,2 @@
-(defn hello
-  `Evaluates to "Hello!"`
-  []
-  "Hello!")
-
-(defn main
-  [& args]
-  (print (hello)))
+(import fltk/constants :export true :prefix "")
+(import fltk/widgets :export true :prefix "")

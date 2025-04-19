@@ -1,5 +1,4 @@
-(use fltk/widgets)
-(use fltk/constants)
+(use fltk)
 
 (def dim 200)
 (def factor 1.3)
