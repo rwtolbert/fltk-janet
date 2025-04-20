@@ -40,7 +40,7 @@
            (set cppflags @["-fPIC" "-I./cfltk/include" "-DCFLTK_USE_GL"])
            (set lflags @[cfltk-lib-path "-lcfltk2" fltk-lib-path
                          "-lfltk_images" "-lfltk_forms" "-lfltk_gl" "-lfltk" "-lfltk_png" "-lfltk_jpeg" "-lfltk_z" "-lGL" "-lGLU" "-lglut"
-                         "-lm" "-lX11" "-lXext" "-lpthread" "-lXrender" "-lfontconfig" "-ldl"])))
+                         "-lm" "-lX11" "-lXext" "-lXft" "-lpthread" "-lXrender" "-lfontconfig" "-ldl"])))
 
 (declare-native
   :name "jfltk/widgets"
