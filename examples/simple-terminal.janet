@@ -28,12 +28,13 @@
   (Fl_Double_Window_begin G_win)
 
   (set G_box (Fl_Box_new 0 0
-                         (Fl_Double_Window_decorated_w G_win) 200
+                         (Fl_Double_Window_width G_win) 200
                          "App GUI in this area.\nDebugging output below."))
 
   (set G_tty (Fl_Terminal_new 0 200
-                              (Fl_Double_Window_decorated_w G_win) *terminal-height* ""))
+                              (Fl_Double_Window_width G_win) *terminal-height* "Console"))
   (Fl_Terminal_set_ansi G_tty 1)
+  (Fl_Terminal_set_align G_tty (bor Fl_Align_Top Fl_Align_Left))
 
   (Fl_Double_Window_end G_win)
   (Fl_Double_Window_resizable G_win G_win)
