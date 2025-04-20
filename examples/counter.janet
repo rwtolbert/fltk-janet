@@ -1,4 +1,4 @@
-(use fltk)
+(use jfltk)
 
 (def *WIDTH* 600)
 (def *HEIGHT* 400)
@@ -7,7 +7,7 @@
 (def *GRAY* 0x75757500)
 
 (defn click-cb [w counter]
-  (def val (inc (int/s64 (Fl_Box_label counter))))
+  (def val (inc (scan-number (Fl_Box_label counter))))
   (Fl_Box_set_label counter (string/format "%d" val)))
 
 (defn draw-shadow [w data]

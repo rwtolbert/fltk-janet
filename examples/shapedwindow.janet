@@ -1,4 +1,4 @@
-(use fltk)
+(use jfltk)
 
 (def dim 200)
 (def factor 1.3)

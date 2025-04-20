@@ -1,4 +1,4 @@
-(use fltk)
+(use jfltk)
 
 (defn main [&]
   (Fl_init_all)

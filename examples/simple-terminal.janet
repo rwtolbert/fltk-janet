@@ -1,4 +1,4 @@
-(use fltk)
+(use jfltk)
 
 (Fl_init_all)
 (Fl_register_images)
