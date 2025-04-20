@@ -1,9 +1,25 @@
 # fltk-janet
 
+This is an experimental [FLTK](https://www.fltk.org) wrapper for Janet using the
+excellent [CFLTK](https://github.com/MoAlyousef/cfltk) code. Janet native code
+is generated via a Python script using `libclang` to parse the cfltk headers.
+
+There are a few examples, just to help with understanding how the wrapper
+might work in Janet. And some CFLTK/FLTK functionality is not wrapped yet.
+
+## Platforms
+
+This has been tested on Windows with MSVC and macOS. Linux using X11
+also works but does require a number of prerequisite packages to be installed.
+
+Still need to test Wayland support.
+
+(add Linux prereq install here)
+
 ## Building
 
 use `janet-pm` from spork. Building requires `cmake` on your PATH in order
-to build `fltk` and `cfktk`
+to build `fltk` and `cfltk` first.
 
 ```
 $ janet-pm build
@@ -13,6 +29,31 @@ $ janet-pm build
 
 ```
 $ janet-pm install
+```
+
+## A very simple example
+
+```janet
+(use jfltk)
+
+(defn clicker [widget event &opt obj]
+  (case event
+    Fl_Event_Push (do
+                    (Fl_Box_set_label obj "Hello")
+                    1)
+    true 0))
+
+
+(def w (Fl_Window_new 100 100 400 300 "handler"))
+(def f (Fl_Box_new 0 0 400 200 ""))
+(def b (Fl_Button_new 160 210 80 40 "Click me"))
+(Fl_Window_end w)
+(Fl_Window_show w)
+
+(def cb (make_custom_callback clicker f))
+
+(Fl_Button_handle b cb)
+(Fl_run)
 ```
 
 ## Running examples
@@ -28,10 +69,15 @@ $ janet examples/counter.janet
 
 ## Updating cfltk
 
-First update the cfltk submodule, then re-generate the wrapper C code with
+First update the cfltk submodule. Generating the wrapper code requires Python 3 with the
+`libclang` package installed.
+
+Something like:
 
 ```
+$ python -m venv .venv
+$ source .venv/bin/activate
+$ pip install libclang
 $ janet bundle/generate-wrapper.janet
 ```
 
-Then rebuild and reinstall.
