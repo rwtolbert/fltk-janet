@@ -69,10 +69,11 @@ $ janet examples/counter.janet
 
 ## Updating cfltk
 
-First update the cfltk submodule. Generating the wrapper code requires Python 3 with the
-`libclang` package installed.
+First update the cfltk submodule, then re-generate the Janet native module code.
 
-Something like:
+Generating the wrapper code requires Python 3 with the `libclang` package installed.
+
+Something like this works, from the root of the source tree:
 
 ```
 $ python -m venv .venv
