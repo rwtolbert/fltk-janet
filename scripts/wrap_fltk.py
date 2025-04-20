@@ -1,10 +1,14 @@
 import os
 import sys
-import clang.cindex
-from clang.cindex import CursorKind, TypeKind
+
+try:
+    import clang.cindex
+    from clang.cindex import CursorKind, TypeKind
+except ImportError:
+    print("Wrapper generation requires `libclang` to be installed.")
+    sys.exit(1)
 
 dirname = os.path.abspath(os.path.dirname(__file__))
-
 
 def fully_qualified(c):
     if c is None:
@@ -536,7 +540,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     module_file = os.path.join(parent_dir, "c/module.cpp")
-    constants_file = os.path.join(parent_dir, "fltk/constants.janet")
+    constants_file = os.path.join(parent_dir, "jfltk/constants.janet")
     with open(module_file, "w") as ofp, open(constants_file, "w") as enums:
         ofp.write("#include <iostream>\n")
         ofp.write("#include <string>\n")
