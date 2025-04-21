@@ -14,7 +14,14 @@ also works but does require a number of prerequisite packages to be installed.
 
 Still need to test Wayland support.
 
-(add Linux prereq install here)
+### Ubuntu 20, 22, 24
+
+```bash
+$ sudo apt-get update
+$ sudo apt-get install build-essential cmake ninja-build libx11-dev \
+    libxext-dev libxft-dev libxft2-dev libxinerama-dev libxcursor-dev \
+    libfontconfig-dev libopengl-dev freeglut3-dev libglu1-mesa-dev
+```
 
 ## Building
 
