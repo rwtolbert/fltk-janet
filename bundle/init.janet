@@ -31,6 +31,8 @@
 
 (when (= (os/which) :linux)
   (array/push fltk-flags "-DCFLTK_USE_FPIC=ON"))
+(when (= (os/which) :linux)
+  (array/push fltk-flags "-DFLTK_BACKEND_WAYLAND=OFF"))
 
 (def- cmake-flags (array/concat cfltk-flags fltk-flags))
 (def- cmake-build-flags @["--build" cfltk-build-dir "--parallel" "--config" "Release"])
