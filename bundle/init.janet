@@ -46,7 +46,12 @@
 (set-command "cmake" *cmakepath*)
 (set-command "ninja" *ninjapath*)
 
-(update-submodules)
-(build-cfltk)
+# (update-submodules)
+# (build-cfltk)
 
 (dofile "project.janet" :env (jpm-shim-env))
+
+(task "build" ["build-cfltk"])
+(task "build-cfltk" [] (do
+                        (update-submodules)
+                        (build-cfltk)))
