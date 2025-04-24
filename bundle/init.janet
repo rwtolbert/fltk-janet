@@ -51,7 +51,7 @@
 
 (dofile "project.janet" :env (jpm-shim-env))
 
-(task "build" ["build-cfltk"])
+(task "pre-build" ["build-cfltk"])
 (task "build-cfltk" [] (do
                         (update-submodules)
                         (build-cfltk)))
