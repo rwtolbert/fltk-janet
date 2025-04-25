@@ -34,7 +34,7 @@
   :macos (do
            (set cppflags @["-I./cfltk/include" "-DCFLTK_USE_GL"])
            (set lflags @[cfltk-lib-path "-lcfltk2" fltk-lib-path "-lfltk"
-                         "-lfltk_images" "-lfltk_forms" "-lfltk_gl""-lfltk_png" "-lfltk_jpeg" "-lfltk_z"
+                         "-lfltk_images" "-lfltk_forms" "-lfltk_gl" "-lfltk_png" "-lfltk_jpeg" "-lfltk_z"
                          "-framework" "Cocoa" "-framework" "OpenGL" "-weak_framework" "ScreenCaptureKit" "-weak_framework" "UniformTypeIdentifiers"]))
   :linux (do
            (set cppflags @["-fPIC" "-I./cfltk/include" "-DCFLTK_USE_GL"])
