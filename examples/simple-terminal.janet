@@ -1,43 +1,43 @@
 (use jfltk)
 
-(Fl_init_all)
-(Fl_register_images)
-(Fl_lock)
+(fl-init-all)
+(fl-register-images)
+(fl-lock)
 
 (def *terminal-height* 120)
 
-(var G_win nil)
-(var G_box nil)
-(var G_tty nil)
+(var G-win nil)
+(var G-box nil)
+(var G-tty nil)
 
-(defn timer_fn [data]
+(defn timer-fn [data]
   (def current (os/strftime "%c"))
   (var lbl "Timer tick")
   (when data
     (set lbl data))
   (def msg (string/format "%s: \e[32m%s\e[0m\n" lbl current))
-  (Fl_Terminal_printf G_tty msg)
-  (Fl_repeat_timeout 2.0 (make_timer_callback timer_fn data)))
+  (fl-terminal-printf G-tty msg)
+  (fl-repeat-timeout 2.0 (make-timer-callback timer-fn data)))
 
 (defn main [&]
-  (Fl_init_all)
-  (Fl_register_images)
-  (Fl_lock)
+  (fl-init-all)
+  (fl-register-images)
+  (fl-lock)
 
-  (set G_win (Fl_Double_Window_new 100 100 500 (+ 200 *terminal-height*) "Terminal"))
-  (Fl_Double_Window_begin G_win)
+  (set G-win (fl-double-window-new 100 100 500 (+ 200 *terminal-height*) "terminal"))
+  (fl-double-window-begin G-win)
 
-  (set G_box (Fl_Box_new 0 0
-                         (Fl_Double_Window_width G_win) 200
+  (set G-box (fl-box-new 0 0
+                         (fl-double-window-width G-win) 200
                          "App GUI in this area.\nDebugging output below."))
 
-  (set G_tty (Fl_Terminal_new 0 200
-                              (Fl_Double_Window_width G_win) *terminal-height* "Console"))
-  (Fl_Terminal_set_ansi G_tty 1)
-  (Fl_Terminal_set_align G_tty (bor Fl_Align_Top Fl_Align_Left))
+  (set G-tty (fl-terminal-new 0 200
+                              (fl-double-window-width G-win) *terminal-height* "Console"))
+  (fl-terminal-set-ansi G-tty 1)
+  (fl-terminal-set-align G-tty (bor Fl-Align-Top Fl-Align-Left))
 
-  (Fl_Double_Window_end G_win)
-  (Fl_Double_Window_resizable G_win G_win)
-  (Fl_Double_Window_show G_win)
-  (Fl_add_timeout 2.0 (make_timer_callback timer_fn "Ticker"))
-  (Fl_run))
+  (fl-double-window-end G-win)
+  (fl-double-window-resizable G-win G-win)
+  (fl-double-window-show G-win)
+  (fl-add-timeout 2.0 (make-timer-callback timer-fn "Ticker"))
+  (fl-run))

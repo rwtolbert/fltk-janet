@@ -2,19 +2,19 @@
 
 (defn clicker [widget event &opt obj]
   (case event
-    Fl_Event_Push (do
-                    (Fl_Box_set_label obj "Hello")
+    Fl-Event-Push (do
+                    (fl-box-set-label obj "hello")
                     1)
     true 0))
 
 
-(def w (Fl_Window_new 100 100 400 300 "handler"))
-(def f (Fl_Box_new 0 0 400 200 ""))
-(def b (Fl_Button_new 160 210 80 40 "Click me"))
-(Fl_Window_end w)
-(Fl_Window_show w)
+(def w (fl-window-new 100 100 400 300 "handler"))
+(def f (fl-box-new 0 0 400 200 ""))
+(def b (fl-button-new 160 210 80 40 "click me"))
+(fl-window-end w)
+(fl-window-show w)
 
-(def cb (make_custom_callback clicker f))
+(def cb (make-custom-callback clicker f))
 
-(Fl_Button_handle b cb)
-(Fl_run)
+(fl-button-handle b cb)
+(fl-run)

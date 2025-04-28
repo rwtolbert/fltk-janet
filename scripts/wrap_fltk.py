@@ -10,6 +10,7 @@ except ImportError:
 
 dirname = os.path.abspath(os.path.dirname(__file__))
 
+
 def fully_qualified(c):
     if c is None:
         return ''
@@ -20,6 +21,11 @@ def fully_qualified(c):
         if res != '':
             return res + '::' + c.spelling
     return c.spelling
+
+
+def to_kebob_case(name):
+    result = name.lower()
+    return result.replace("_", "-")
 
 
 CALLBACK = '''
@@ -135,12 +141,11 @@ JanetFlCallback *new_abstract_callback(JanetFunction *fn, const Janet *argv,
     callbacker = new Callbacker(fn);
   }
 
-//  auto *callbacker = new Callbacker(fn, data);
   cb->cb = callbacker;
   return cb;
 }
 
-JANET_FN(cfun_new_fl_callback, "(jfltk/new_fl_callback fn &opt data)", "Create new Fl_Callback") {
+JANET_FN(cfun_new_fl_callback, "(jfltk/new-fl-callback fn &opt data)", "Create new Fl_Callback") {
     janet_arity(argc, 1, 2);
     JanetFlCallback* cb = nullptr;
     if (!janet_checktype(argv[0], JANET_FUNCTION)) {
@@ -152,7 +157,7 @@ JANET_FN(cfun_new_fl_callback, "(jfltk/new_fl_callback fn &opt data)", "Create n
     return janet_wrap_abstract(cb);
 }
 
-JANET_FN(cfun_new_custom_callback, "(jfltk/new_custom_callback fn &opt data)", "Create new custom_handler_callback") {
+JANET_FN(cfun_new_custom_callback, "(jfltk/new-custom-callback fn &opt data)", "Create new custom_handler_callback") {
     janet_arity(argc, 1, 2);
     JanetFlCallback* cb = nullptr;
     if (!janet_checktype(argv[0], JANET_FUNCTION)) {
@@ -164,7 +169,7 @@ JANET_FN(cfun_new_custom_callback, "(jfltk/new_custom_callback fn &opt data)", "
     return janet_wrap_abstract(cb);
 }
 
-JANET_FN(cfun_new_draw_callback, "(jfltk/new_draw_callback fn &opt data)", "Create new custom_draw_callback") {
+JANET_FN(cfun_new_draw_callback, "(jfltk/new-draw-callback fn &opt data)", "Create new custom_draw_callback") {
     janet_arity(argc, 1, 2);
     JanetFlCallback* cb = nullptr;
     if (!janet_checktype(argv[0], JANET_FUNCTION)) {
@@ -176,7 +181,7 @@ JANET_FN(cfun_new_draw_callback, "(jfltk/new_draw_callback fn &opt data)", "Crea
     return janet_wrap_abstract(cb);
 }
 
-JANET_FN(cfun_new_timer_callback, "(jfltk/new_timer_callback fn &opt data)", "Create new custom_handlder_callback") {
+JANET_FN(cfun_new_timer_callback, "(jfltk/new-timer-callback fn &opt data)", "Create new custom_handlder_callback") {
     janet_arity(argc, 1, 2);
     JanetFlCallback* cb = nullptr;
     if (!janet_checktype(argv[0], JANET_FUNCTION)) {
@@ -511,7 +516,9 @@ def handle_enum(c, ofp):
         if val is None:
             print(f"unable to handle enum: {child.spelling}")
             sys.exit(1)
-        ofp.write(f"(def {child.spelling} {to_int(val)})\n")
+        jname = to_kebob_case(child.spelling)
+        jname = child.spelling.replace("_", "-")
+        ofp.write(f"(def {jname} {to_int(val)})\n")
 
 
 def parse_header(fname, ofp, defs, enums):
@@ -563,10 +570,11 @@ if __name__ == "__main__":
         ofp.write('''JANET_MODULE_ENTRY(JanetTable *env) {
         JanetRegExt cfuns[] = {\n''')
         for cname in defs.keys():
-            ofp.write(f'        JANET_REG("{defs[cname]}", {cname}),\n')
-        ofp.write('        JANET_REG("make_callback", cfun_new_fl_callback),\n')
-        ofp.write('        JANET_REG("make_custom_callback", cfun_new_custom_callback),\n')
-        ofp.write('        JANET_REG("make_draw_callback", cfun_new_draw_callback),\n')
-        ofp.write('        JANET_REG("make_timer_callback", cfun_new_timer_callback),\n')
+            jname = to_kebob_case(defs[cname])
+            ofp.write(f'        JANET_REG("{jname}", {cname}),\n')
+        ofp.write('        JANET_REG("make-callback", cfun_new_fl_callback),\n')
+        ofp.write('        JANET_REG("make-custom-callback", cfun_new_custom_callback),\n')
+        ofp.write('        JANET_REG("make-draw-callback", cfun_new_draw_callback),\n')
+        ofp.write('        JANET_REG("make-timer-callback", cfun_new_timer_callback),\n')
         ofp.write("        JANET_REG_END\n    };\n")
         ofp.write('    janet_cfuns_ext(env, "jfltk", cfuns);\n}\n')

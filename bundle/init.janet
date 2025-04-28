@@ -53,5 +53,5 @@
 
 (task "pre-build" ["build-cfltk"])
 (task "build-cfltk" [] (do
-                        (update-submodules)
-                        (build-cfltk)))
+                         #(update-submodules)
+                         (build-cfltk)))
