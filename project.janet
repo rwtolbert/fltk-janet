@@ -39,8 +39,8 @@
   :linux (do
            (set cppflags @["-fPIC" "-I./cfltk/include" "-DCFLTK_USE_GL"])
            (set lflags @[cfltk-lib-path "-lcfltk2" fltk-lib-path
-                         "-lfltk_images" "-lfltk_forms" "-lfltk_gl" "-lfltk" "-lfltk_png" "-lfltk_jpeg" "-lfltk_z" "-lGL" "-lGLU" "-lglut"
-                         "-lm" "-lX11" "-lXext" "-lXft" "-lXinerama" "-lXcursor" "-lpthread" "-lXrender" "-lfontconfig" "-ldl"])))
+                         "-lfltk_images" "-lfltk_forms" "-lfltk_gl" "-lfltk" "-lfltk_png" "-lfltk_jpeg" "-lfltk_z" "-lGL" "-lGLU" "-lEGL" "-lglut"
+                         "-lm" "-lX11" "-lXext" "-lXft" "-lXinerama" "-lXcursor" "-lpthread" "-lwayland-client" "-lwayland-cursor" "-lwayland-egl" "-lxkbcommon" "-lcairo" "-lpango-1.0" "-lpangoxft-1.0" "-lpangocairo-1.0" "-lXrender" "-lfontconfig" "-ldl"])))
 
 (declare-native
   :name "jfltk/widgets"
