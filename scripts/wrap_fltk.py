@@ -201,45 +201,42 @@ JANET_FN(cfun_{name},
          "") {{
     janet_fixarity(argc, {arity});'''
 
-ARG_TEMPLATE = '''    if (!janet_checktype(argv[{N}], {jtype})) {{
-        janet_panicf("expected {argtype}, got %q", argv[{N}]);
+ARG_TEMPLATE = '''    if (!janet_checktype(argv[{M}], {jtype})) {{
+        janet_panicf("expected {argtype}, got %q", argv[{M}]);
     }}
-    {argtype} arg{N} = {jfunc}(argv, {N});
+    {argtype} arg{N} = {jfunc}(argv, {M});
 '''
 
-PTR_TEMPLATE  = '''    if (!janet_checktype(argv[{N}], {jtype})) {{
-        janet_panicf("expected {argtype}, got %q", argv[{N}]);
+PTR_TEMPLATE  = '''    if (!janet_checktype(argv[{M}], {jtype})) {{
+        janet_panicf("expected {argtype}, got %q", argv[{M}]);
     }}
-    {argtype} arg{N} = ({argtype}){jfunc}(argv, {N});
+    {argtype} arg{N} = ({argtype}){jfunc}(argv, {M});
     if (!arg{N}) {{
         janet_panicf("expected {argtype}, got nil");
     }}
 '''
 
-# JANET_TEMPLATE = '''   void * arg{N} = (void *)(&argv[{N}]);\n'''
-
-JANET_TEMPLATE = '''    if (!janet_checktype(argv[{N}], {jtype})) {{
-        janet_panicf("expected {argtype}, got %q", argv[{N}]);
+JANET_TEMPLATE = '''    if (!janet_checktype(argv[{M}], {jtype})) {{
+        janet_panicf("expected {argtype}, got %q", argv[{M}]);
     }}
-    {argtype} arg{N} = {jfunc}(argv, {N});
+    {argtype} arg{N} = {jfunc}(argv, {M});
 '''
 
-JANET_FUNC_TEMPLATE  = '''    if (!janet_checktype(argv[{N}], {jtype})) {{
-        janet_panicf("expected {argtype}, got %q", argv[{N}]);
+JANET_FUNC_TEMPLATE  = '''    if (!janet_checktype(argv[{M}], {jtype})) {{
+        janet_panicf("expected {argtype}, got %q", argv[{M}]);
     }}
-    {argtype} jarg{N} = ({argtype}){jfunc}(argv, {N}, &callbacker_type);
+    {argtype} jarg{N} = ({argtype}){jfunc}(argv, {M}, &callbacker_type);
     if (!jarg{N}) {{
         janet_panicf("expected {argtype}, got nil");
     }}
-    // auto arg{N} = make_callback(jarg{N});
     auto arg{N} = jarg{N}->cb->static_fl_callback;
     void* arg{N_next} = (void*)jarg{N}->cb;
 '''
 
-CUSTOM_DRAW_TEMPLATE  = '''    if (!janet_checktype(argv[{N}], {jtype})) {{
-        janet_panicf("expected {argtype}, got %q", argv[{N}]);
+CUSTOM_DRAW_TEMPLATE  = '''    if (!janet_checktype(argv[{M}], {jtype})) {{
+        janet_panicf("expected {argtype}, got %q", argv[{M}]);
     }}
-    {argtype} jarg{N} = ({argtype}){jfunc}(argv, {N}, &callbacker_type);
+    {argtype} jarg{N} = ({argtype}){jfunc}(argv, {M}, &callbacker_type);
     if (!jarg{N}) {{
         janet_panicf("expected {argtype}, got nil");
     }}
@@ -247,10 +244,10 @@ CUSTOM_DRAW_TEMPLATE  = '''    if (!janet_checktype(argv[{N}], {jtype})) {{
     void* arg{N_next} = (void*)jarg{N}->cb;
 '''
 
-CUSTOM_HANDLER_TEMPLATE  = '''    if (!janet_checktype(argv[{N}], {jtype})) {{
-        janet_panicf("expected {argtype}, got %q", argv[{N}]);
+CUSTOM_HANDLER_TEMPLATE  = '''    if (!janet_checktype(argv[{M}], {jtype})) {{
+        janet_panicf("expected {argtype}, got %q", argv[{M}]);
     }}
-    {argtype} jarg{N} = ({argtype}){jfunc}(argv, {N}, &callbacker_type);
+    {argtype} jarg{N} = ({argtype}){jfunc}(argv, {M}, &callbacker_type);
     if (!jarg{N}) {{
         janet_panicf("expected {argtype}, got nil");
     }}
@@ -258,10 +255,10 @@ CUSTOM_HANDLER_TEMPLATE  = '''    if (!janet_checktype(argv[{N}], {jtype})) {{
     void* arg{N_next} = (void*)jarg{N}->cb;
 '''
 
-TIMER_TEMPLATE  = '''    if (!janet_checktype(argv[{N}], {jtype})) {{
-        janet_panicf("expected {argtype}, got %q", argv[{N}]);
+TIMER_TEMPLATE  = '''    if (!janet_checktype(argv[{M}], {jtype})) {{
+        janet_panicf("expected {argtype}, got %q", argv[{M}]);
     }}
-    {argtype} jarg{N} = ({argtype}){jfunc}(argv, {N}, &callbacker_type);
+    {argtype} jarg{N} = ({argtype}){jfunc}(argv, {M}, &callbacker_type);
     if (!jarg{N}) {{
         janet_panicf("expected {argtype}, got nil");
     }}
@@ -275,7 +272,7 @@ CALL_TEMPLATE = '''    {return_val} out = ({return_val}){name}({arg_string});
 FUNC_RETURN_TEMPLATE = '''    {return_val} out = ({return_val}){name}({arg_string});
     return {wrap_func}((JanetCFunction)out);'''
 
-def print_arg(N, arg):
+def print_arg(N, arg, M):
     argtype = arg.type.spelling
     type_kind = arg.type.kind
     jtype = None
@@ -400,6 +397,7 @@ class Arg:
     name: str
     argtype: str
     num: int
+    argv_num: int = 0
     skip: bool = False
 
 
@@ -432,6 +430,12 @@ def print_janet_function(c, defs):
             arg.skip = True
         previous_arg_type = arg.argtype
 
+    num_counter = 0
+    for arg in args:
+        if not arg.skip:
+            arg.argv_num = num_counter
+            num_counter += 1
+
     arg_types = ",".join([x.argtype for x in args])
 
     arg_string = ""
@@ -453,7 +457,7 @@ def print_janet_function(c, defs):
     # cast all the args
     for arg in args:
         if not arg.skip:
-            res = print_arg(arg.num, arg.arg)
+            res = print_arg(arg.num, arg.arg, arg.argv_num)
             if res is None:
                 print("unable to handle arg", arg.name, arg.argtype)
                 return None
