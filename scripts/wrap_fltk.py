@@ -277,8 +277,9 @@ FUNC_RETURN_TEMPLATE = '''    {return_val} out = ({return_val}){name}({arg_strin
     return {wrap_func}((JanetCFunction)out);'''
 
 def print_arg(N, arg, M):
-    argtype = arg.type.spelling
-    type_kind = arg.type.kind
+    argtype = arg.arg.type.spelling
+    type_kind = arg.arg.type.kind
+    argname = arg.name
     jtype = None
     jfunc = None
     result = None
@@ -327,8 +328,13 @@ def print_arg(N, arg, M):
             # print(" ** UNKNOWN POINTER TYPE", type_kind, argtype)
             return None
     elif type_kind == TypeKind.INT:
-        jtype = "JANET_NUMBER"
-        jfunc = "janet_getinteger"
+        if argname == "boolean":
+            print("$$$ found boolean")
+            jtype = "JANET_BOOLEAN"
+            jfunc = "janet_getboolean"
+        else:
+            jtype = "JANET_NUMBER"
+            jfunc = "janet_getinteger"
     elif argtype in ["float", "double",
                      "unsigned int", "const unsigned int",
                      "unsigned char", "char", "short", "long",
@@ -346,7 +352,7 @@ def print_arg(N, arg, M):
         # jfunc = "janet_getpointer"
     else:
         # print(" ** UNKNOWN type", type_kind, arg.type.spelling)
-        print(N, arg.spelling, arg.type.spelling)
+        print(N, arg.arg.spelling, arg.arg.type.spelling)
         return None
 
     N_next = N + 1
@@ -462,7 +468,7 @@ def print_janet_function(c, defs):
     # cast all the args
     for arg in args:
         if not arg.skip:
-            res = print_arg(arg.num, arg.arg, arg.argv_num)
+            res = print_arg(arg.num, arg, arg.argv_num)
             if res is None:
                 print("unable to handle arg", arg.name, arg.argtype)
                 return None

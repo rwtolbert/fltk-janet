@@ -20,12 +20,15 @@
       (set default-filename (path/join "." "untitled.txt"))))
   default-filename)
 
+(defn- make-shortcut [mod char]
+  (bor mod (get (string/bytes char) 0)))
+
 (defn- save-file [fname]
   "Save some data to a file, but only if it doesn't already exist"
-  (fl-terminal-printf (string/format "Saving %s" fname))
+  (fl-terminal-printf *console* (string/format "Saving %s\n" fname))
   (unless (sh/exists? fname)
     (def fp (file/open fname :w))
-    (file/write fp "Hello world")
+    (file/write fp "Hello world\n")
     (file/close fp)))
 
 (defn- file-open [w data]
@@ -71,13 +74,16 @@
 
   (def menubar (fl-menu-bar-new 0 0 500 25 ""))
   (def open-cb (make-callback file-open menubar))
-  (fl-menu-bar-add menubar "&File/&Open" 0 open-cb 0)
+  (fl-menu-bar-add menubar "&File/&Open"
+                   (make-shortcut Fl-Shortcut-Ctrl "o") open-cb 0)
   (def save-cb (make-callback file-save menubar))
-  (fl-menu-bar-add menubar "&File/&Save" 0 save-cb 0)
+  (fl-menu-bar-add menubar "&File/&Save"
+                   (make-shortcut Fl-Shortcut-Ctrl "s") save-cb 0)
   (def save-as-cb (make-callback file-save-as menubar))
   (fl-menu-bar-add menubar "&File/Save &As" 0 save-as-cb 0)
   (def quit-cb (make-callback file-quit *main-window*))
-  (fl-menu-bar-add menubar "&File/&Quit" 0 quit-cb 0)
+  (fl-menu-bar-add menubar "&File/&Quit"
+                   (make-shortcut Fl-Shortcut-Ctrl "q") quit-cb 0)
 
   (def- message ``This demo shows an example of implementing
                common 'File' menu operations like:
