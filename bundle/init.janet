@@ -64,10 +64,13 @@
 
 (defn fltk-libs []
   (if (sh/exists? fltk-config)
-    (do (def out (sh/exec-slurp fltk-config "--use-gl" "--use-images" "--use-glut" "--use-forms" "--use-cairo" "--ldflags"))
-      (string/split " " out))
+    (if (not (= (os/which) :windows))
+      (do
+        (def out (sh/exec-slurp fltk-config "--use-gl" "--use-images" "--use-glut" "--use-forms" "--use-cairo" "--ldflags"))
+        (string/split " " out))
+      @[])
     (do (build-cfltk)
-      (fltk-libs))))
+        (fltk-libs))))
 
 (defdyn *lflags* "Linker flags")
 (setdyn *lflags* (array/join @[cfltk-lib-path "-lcfltk2"] (fltk-libs)))
