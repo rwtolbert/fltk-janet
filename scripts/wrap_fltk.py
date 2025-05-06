@@ -329,7 +329,6 @@ def print_arg(N, arg, M):
             return None
     elif type_kind == TypeKind.INT:
         if argname == "boolean":
-            print("$$$ found boolean")
             jtype = "JANET_BOOLEAN"
             jfunc = "janet_getboolean"
         else:
@@ -581,6 +580,9 @@ if __name__ == "__main__":
         for header in headers:
             print(header)
             parse_header(os.path.abspath(header), ofp, defs, enums)
+
+        # handle special case constants
+        enums.write("(def Fl-Shortcut-Command (if (= (os/which) :macos) Fl-Shortcut-Meta Fl-Shortcut-Ctrl))\n")
 
         ofp.write('''JANET_MODULE_ENTRY(JanetTable *env) {
         JanetRegExt cfuns[] = {\n''')

@@ -75,15 +75,15 @@
   (def menubar (fl-menu-bar-new 0 0 500 25 ""))
   (def open-cb (make-callback file-open menubar))
   (fl-menu-bar-add menubar "&File/&Open"
-                   (make-shortcut Fl-Shortcut-Ctrl "o") open-cb 0)
+                   (make-shortcut Fl-Shortcut-Command "o") open-cb 0)
   (def save-cb (make-callback file-save menubar))
   (fl-menu-bar-add menubar "&File/&Save"
-                   (make-shortcut Fl-Shortcut-Ctrl "s") save-cb 0)
+                   (make-shortcut Fl-Shortcut-Command "s") save-cb 0)
   (def save-as-cb (make-callback file-save-as menubar))
   (fl-menu-bar-add menubar "&File/Save &As" 0 save-as-cb 0)
   (def quit-cb (make-callback file-quit *main-window*))
   (fl-menu-bar-add menubar "&File/&Quit"
-                   (make-shortcut Fl-Shortcut-Ctrl "q") quit-cb 0)
+                   (make-shortcut Fl-Shortcut-Command "q") quit-cb 0)
 
   (def- message ``This demo shows an example of implementing
                common 'File' menu operations like:

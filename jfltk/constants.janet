@@ -459,3 +459,4 @@
 (def Fl-Table-RESIZE-COL-RIGHT 2)
 (def Fl-Table-RESIZE-ROW-ABOVE 3)
 (def Fl-Table-RESIZE-ROW-BELOW 4)
+(def Fl-Shortcut-Command (if (= (os/which) :macos) Fl-Shortcut-Meta Fl-Shortcut-Ctrl))
