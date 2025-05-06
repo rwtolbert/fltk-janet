@@ -1,43 +1,108 @@
 (use jfltk)
-
-(Fl_init_all)
-(Fl_register_images)
-(Fl_lock)
+(import spork/path)
+(import spork/sh)
 
 (def *terminal-height* 120)
 
 (var *main-window* nil)
-(var *box* nil)
 (var *console* nil)
 
-(defn timer_fn [data]
-  (def current (os/strftime "%c"))
-  (var lbl "Timer tick")
-  (when data
-    (set lbl data))
-  (def msg (string/format "%s: \e[32m%s\e[0m\n" lbl current))
-  (Fl_Terminal_printf *console* msg)
-  (Fl_repeat_timeout 2.0 (make_timer_callback timer_fn data)))
+(def- *fc* (fl-native-file-chooser-new Fl-NativeFileChooserType-BrowseFile))
+
+(var default-filename nil)
+(defn- untitled-default []
+  (unless default-filename
+    (when (os/getenv "HOME")
+      (set default-filename (path/join (os/getenv "HOME") "untitled.txt")))
+    (when (os/getenv "HOME_PATH")
+      (set default-filename (path/join (os/getenv "HOME_PATH") "untitled.txt")))
+    (when (nil? default-filename)
+      (set default-filename (path/join "." "untitled.txt"))))
+  default-filename)
+
+(defn- save-file [fname]
+  "Save some data to a file, but only if it doesn't already exist"
+  (fl-terminal-printf (string/format "Saving %s" fname))
+  (unless (sh/exists? fname)
+    (def fp (file/open fname :w))
+    (file/write fp "Hello world")
+    (file/close fp)))
+
+(defn- file-open [w data]
+  (fl-native-file-chooser-set-title *fc* "Open")
+  (fl-native-file-chooser-set-type *fc* Fl-NativeFileChooserType-BrowseFile)
+  (case (fl-native-file-chooser-show *fc*)
+    -1 return # error
+    1 return  # cancel
+    0 (do
+        (def fname (fl-native-file-chooser-filename *fc*))
+        (when fname 
+          (fl-native-file-chooser-set-preset-file *fc* fname)
+          (fl-terminal-printf *console* (string/format "Open: %s\n" fname))))))
+
+(defn- file-save-as [w data]
+  (fl-native-file-chooser-set-title *fc* "Save As")
+  (fl-native-file-chooser-set-type *fc* Fl-NativeFileChooserType-SaveFile)
+  (case (fl-native-file-chooser-show *fc*)
+    -1 return # error
+    1 return  # cancel
+    0 (do
+        (def fname (fl-native-file-chooser-filename *fc*))
+        (when fname 
+          (fl-native-file-chooser-set-preset-file *fc* fname)
+          (save-file fname)))))
+
+(defn- file-save [w data]
+  (def fname (fl-native-file-chooser-filename *fc*))
+  (if fname
+    (save-file fname)
+    (file-save-as w data)))
+
+(defn- file-quit [w data]
+  (fl-double-window-hide data))
 
 (defn main [&]
-  (Fl_init_all)
-  (Fl_register_images)
-  (Fl_lock)
+  (fl-init-all)
+  (fl-register-images)
+  (fl-lock)
 
-  (set G_win (Fl_Double_Window_new 100 100 500 (+ 200 *terminal-height*) "Terminal"))
-  (Fl_Double_Window_begin G_win)
+  (set *main-window* (fl-double-window-new 100 100 500 (+ 200 *terminal-height*) "Terminal"))
+  (fl-double-window-begin *main-window*)
 
-  (set G_box (Fl_Box_new 0 0
-                         (Fl_Double_Window_width G_win) 200
-                         "App GUI in this area.\nDebugging output below."))
+  (def menubar (fl-menu-bar-new 0 0 500 25 ""))
+  (def open-cb (make-callback file-open menubar))
+  (fl-menu-bar-add menubar "&File/&Open" 0 open-cb 0)
+  (def save-cb (make-callback file-save menubar))
+  (fl-menu-bar-add menubar "&File/&Save" 0 save-cb 0)
+  (def save-as-cb (make-callback file-save-as menubar))
+  (fl-menu-bar-add menubar "&File/Save &As" 0 save-as-cb 0)
+  (def quit-cb (make-callback file-quit *main-window*))
+  (fl-menu-bar-add menubar "&File/&Quit" 0 quit-cb 0)
 
-  (set G_tty (Fl_Terminal_new 0 200
-                              (Fl_Double_Window_width G_win) *terminal-height* "Console"))
-  (Fl_Terminal_set_ansi G_tty 1)
-  (Fl_Terminal_set_align G_tty (bor Fl_Align_Top Fl_Align_Left))
+  (def- message ``This demo shows an example of implementing
+               common 'File' menu operations like:
+                   File/Open, File/Save, File/Save As
+               ... using the fl-native-file-chooser widget.
+               Note 'Save' and 'Save As' really *do* create files! 
+               This is to show how behavior differs when 
+               files exist vs. do not.``)
+  (def box1 (fl-box-new 0 0
+                        (fl-double-window-width *main-window*) 200
+                        message))
+  (fl-box-set-align box1
+                    (bor Fl-Align-Center Fl-Align-Inside Fl-Align-Wrap))
 
-  (Fl_Double_Window_end G_win)
-  (Fl_Double_Window_resizable G_win G_win)
-  (Fl_Double_Window_show G_win)
-  (Fl_add_timeout 2.0 (make_timer_callback timer_fn "Ticker"))
-  (Fl_run))
+  (set *console* (fl-terminal-new 0 200
+                                  (fl-double-window-width *main-window*) *terminal-height*
+                                  "Console"))
+  (fl-terminal-set-ansi *console* true)
+  (fl-terminal-set-align *console* (bor Fl-Align-Top Fl-Align-Left))
+
+  (fl-double-window-end *main-window*)
+  (fl-double-window-resizable *main-window* *main-window*)
+  (fl-double-window-show *main-window*)
+
+  (fl-native-file-chooser-set-filter *fc* "Text\t*.txt\n")
+  (fl-native-file-chooser-set-preset-file *fc* (untitled-default))
+  
+  (fl-run))

@@ -269,6 +269,10 @@ TIMER_TEMPLATE  = '''    if (!janet_checktype(argv[{M}], {jtype})) {{
 CALL_TEMPLATE = '''    {return_val} out = ({return_val}){name}({arg_string});
     return {wrap_func}(out);'''
 
+PTR_RETURN_TEMPLATE = '''    {return_val} out = ({return_val}){name}({arg_string});
+    if (!out) return janet_wrap_nil();
+    return {wrap_func}(out);'''
+
 FUNC_RETURN_TEMPLATE = '''    {return_val} out = ({return_val}){name}({arg_string});
     return {wrap_func}((JanetCFunction)out);'''
 
@@ -368,6 +372,7 @@ def call_function(name, args, return_val):
     elif return_val in ["unsigned int", "unsigned char", "char", "float", "double", "short", "long", "unsigned short", "unsigned long"]:
         wrap_func = "janet_wrap_number"
     elif return_val == "const char *":
+        template = PTR_RETURN_TEMPLATE
         wrap_func = "janet_cstringv"
     elif return_val in ["float", "double"]:
         wrap_func = "janet_wrap_number"

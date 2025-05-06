@@ -1,3 +1,6 @@
+(import spork/sh)
+(import spork/path)
+
 (declare-project
   :name "fltk-janet"
   :description ```Janet wrapper for FLTK```
@@ -5,20 +8,10 @@
   :dependencies @["spork"]
   :version "0.1.0")
 
-(setdyn :verbose true)
-(setdyn *build-type* :release)
-
 (def build-type (string (dyn *build-type* :release)))
 
-(var cfltk-lib-path nil)
-(var fltk-lib-path nil)
-(if (= (os/which) :windows)
-  (do
-    (set cfltk-lib-path (string/format "/LIBPATH:./_build/%s/cfltk-build" build-type))
-    (set fltk-lib-path (string/format "/LIBPATH:./_build/%s/cfltk-build/fltk/lib" build-type)))
-  (do
-    (set cfltk-lib-path (string/format "-L./_build/%s/cfltk-build" build-type))
-    (set fltk-lib-path (string/format "-L./_build/%s/cfltk-build/fltk/lib" build-type))))
+(setdyn :verbose true)
+(setdyn *build-type* :release)
 
 (declare-source
   :source ["jfltk"])
@@ -38,9 +31,7 @@
                          "-framework" "Cocoa" "-framework" "OpenGL" "-weak_framework" "ScreenCaptureKit" "-weak_framework" "UniformTypeIdentifiers"]))
   :linux (do
            (set cppflags @["-fPIC" "-I./cfltk/include" "-DCFLTK_USE_GL"])
-           (set lflags @[cfltk-lib-path "-lcfltk2" fltk-lib-path
-                         "-lfltk_images" "-lfltk_forms" "-lfltk_gl" "-lfltk" "-lfltk_png" "-lfltk_jpeg" "-lfltk_z" "-lGL" "-lGLU" "-lEGL" "-lglut"
-                         "-lm" "-lX11" "-lXext" "-lXft" "-lXinerama" "-lXcursor" "-lpthread" "-lwayland-client" "-lwayland-cursor" "-lwayland-egl" "-lxkbcommon" "-lcairo" "-lpango-1.0" "-lpangoxft-1.0" "-lpangocairo-1.0" "-lXrender" "-lfontconfig" "-ldl"])))
+           (set lflags (dyn *lflags*))))
 
 (declare-native
   :name "jfltk/widgets"
