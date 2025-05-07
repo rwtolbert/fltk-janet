@@ -2,14 +2,14 @@
 (import spork/path)
 (import spork/sh)
 
-(def *terminal-height* 120)
+(def *terminal-height* 100)
 
 (var *main-window* nil)
 (var *console* nil)
 
 (def- *fc* (fl-native-file-chooser-new Fl-NativeFileChooserType-BrowseFile))
 
-(var default-filename nil)
+(var- default-filename nil)
 (defn- untitled-default []
   (unless default-filename
     (when (os/getenv "HOME")
@@ -85,18 +85,21 @@
   (fl-menu-bar-add menubar "&File/&Quit"
                    (make-shortcut Fl-Shortcut-Command "q") quit-cb 0)
 
-  (def- message ``This demo shows an example of implementing
+  (def ww (fl-double-window-width *main-window*))
+  (def wh (fl-double-window-height *main-window*))
+  (def message ``This demo shows an example of implementing
                common 'File' menu operations like:
                    File/Open, File/Save, File/Save As
                ... using the fl-native-file-chooser widget.
                Note 'Save' and 'Save As' really *do* create files! 
                This is to show how behavior differs when 
                files exist vs. do not.``)
-  (def box1 (fl-box-new 0 0
-                        (fl-double-window-width *main-window*) 200
-                        message))
+  (def box1 (fl-box-new 20 45 (- ww 40) (- wh 65 *terminal-height*) message))
+  (fl-box-set-color box1 45)
+  (fl-box-set-box box1 Fl-BoxType-FlatBox)
   (fl-box-set-align box1
                     (bor Fl-Align-Center Fl-Align-Inside Fl-Align-Wrap))
+  (fl-box-set-label-size box1 12)
 
   (set *console* (fl-terminal-new 0 200
                                   (fl-double-window-width *main-window*) *terminal-height*
