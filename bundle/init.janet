@@ -62,6 +62,12 @@
 
 (def- fltk-config (path/join (os/cwd) (string/format "%s/fltk/fltk-config" cfltk-build-dir)))
 
+(def- windows-fltk-libs
+  @[cfltk-lib-path "cfltk2.lib" fltk-lib-path
+    "fltk.lib" "fltk_forms.lib" "fltk_gl.lib" "fltk_images.lib" "fltk_png.lib" "fltk_jpeg.lib" "fltk_z.lib"
+    "glu32.lib" "opengl32.lib" "ole32.lib" "uuid.lib" "comctl32.lib" "gdi32.lib" "gdiplus.lib"
+    "user32.lib" "shell32.lib" "comdlg32.lib" "ws2_32.lib" "winspool.lib"])
+
 (defn fltk-libs []
   (if (sh/exists? fltk-config)
     (if (not (= (os/which) :windows))
@@ -73,7 +79,9 @@
         (fltk-libs))))
 
 (defdyn *lflags* "Linker flags")
-(setdyn *lflags* (array/join @[cfltk-lib-path "-lcfltk2"] (fltk-libs)))
+(setdyn *lflags* (if (= (os/which) :windows)
+                   windows-fltk-libs
+                   (array/join @[cfltk-lib-path "-lcfltk2"] (fltk-libs))))
 
 (dofile "project.janet" :env (jpm-shim-env))
 

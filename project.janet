@@ -21,9 +21,7 @@
 (case (os/which)
   :windows (do
              (set cppflags @["/bigobj" "-I./cfltk/include" "-DCFLTK_USE_GL"])
-             (set lflags @[cfltk-lib-path "cfltk2.lib" fltk-lib-path
-                           "fltk.lib" "fltk_forms.lib" "fltk_gl.lib" "fltk_images.lib" "fltk_png.lib" "fltk_jpeg.lib" "fltk_z.lib"
-                           "glu32.lib" "opengl32.lib" "ole32.lib" "uuid.lib" "comctl32.lib" "gdi32.lib" "gdiplus.lib" "user32.lib" "shell32.lib" "comdlg32.lib" "ws2_32.lib" "winspool.lib"]))
+             (set lflags (dyn *lflags*)))
   :macos (do
            (set cppflags @["-I./cfltk/include" "-DCFLTK_USE_GL"])
            (set lflags (dyn *lflags*)))
