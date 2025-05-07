@@ -26,7 +26,7 @@
 (defn- update-submodules []
   (pm/git "submodule" "update" "--init" "--recursive"))
 
-(def- cfltk-build-dir (string/format "_build/%s/cfltk-build" build-type))
+(def- cfltk-build-dir (string/format "_build/cfltk-build"))
 (def- fltk-flags @["-DFLTK_USE_SYSTEM_LIBJPEG=OFF"
                    "-DFLTK_USE_SYSTEM_LIBPNG=OFF"
                    "-DFLTK_USE_SYSTEM_ZLIB=OFF"])
@@ -54,13 +54,13 @@
 (var fltk-lib-path nil)
 (if (= (os/which) :windows)
   (do
-    (set cfltk-lib-path (string/format "/LIBPATH:./_build/%s/cfltk-build" build-type))
-    (set fltk-lib-path (string/format "/LIBPATH:./_build/%s/cfltk-build/fltk/lib" build-type)))
+    (set cfltk-lib-path (string/format "/LIBPATH:./%s/cfltk-build" cfltk-build-dir))
+    (set fltk-lib-path (string/format "/LIBPATH:./%s/cfltk-build/fltk/lib" cfltk-build-dir)))
   (do
-    (set cfltk-lib-path (string/format "-L./_build/%s/cfltk-build" build-type))
-    (set fltk-lib-path (string/format "-L./_build/%s/cfltk-build/fltk/lib" build-type))))
+    (set cfltk-lib-path (string/format "-L./%s" cfltk-build-dir))
+    (set fltk-lib-path (string/format "-L./%s/fltk/lib" cfltk-build-dir))))
 
-(def- fltk-config (path/join (os/cwd) "_build/release/cfltk-build/fltk/fltk-config"))
+(def- fltk-config (path/join (os/cwd) (string/format "%s/fltk/fltk-config" cfltk-build-dir)))
 
 (defn fltk-libs []
   (if (sh/exists? fltk-config)
@@ -74,7 +74,6 @@
 
 (defdyn *lflags* "Linker flags")
 (setdyn *lflags* (array/join @[cfltk-lib-path "-lcfltk2"] (fltk-libs)))
-(pp (dyn *lflags*))
 
 (dofile "project.janet" :env (jpm-shim-env))
 
