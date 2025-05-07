@@ -26,9 +26,7 @@
                            "glu32.lib" "opengl32.lib" "ole32.lib" "uuid.lib" "comctl32.lib" "gdi32.lib" "gdiplus.lib" "user32.lib" "shell32.lib" "comdlg32.lib" "ws2_32.lib" "winspool.lib"]))
   :macos (do
            (set cppflags @["-I./cfltk/include" "-DCFLTK_USE_GL"])
-           (set lflags @[cfltk-lib-path "-lcfltk2" fltk-lib-path "-lfltk"
-                         "-lfltk_images" "-lfltk_forms" "-lfltk_gl" "-lfltk_png" "-lfltk_jpeg" "-lfltk_z"
-                         "-framework" "Cocoa" "-framework" "OpenGL" "-weak_framework" "ScreenCaptureKit" "-weak_framework" "UniformTypeIdentifiers"]))
+           (set lflags (dyn *lflags*)))
   :linux (do
            (set cppflags @["-fPIC" "-I./cfltk/include" "-DCFLTK_USE_GL"])
            (set lflags (dyn *lflags*))))
