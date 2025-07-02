@@ -33,7 +33,7 @@
 
   (set G-tty (fl-terminal-new 0 200
                               (fl-double-window-width G-win) *terminal-height* "Console"))
-  (fl-terminal-set-ansi G-tty 1)
+  (fl-terminal-set-ansi G-tty true)
   (fl-terminal-set-align G-tty (bor Fl-Align-Top Fl-Align-Left))
 
   (fl-double-window-end G-win)
