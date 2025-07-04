@@ -9,10 +9,9 @@ might work in Janet. And some CFLTK/FLTK functionality is not wrapped yet.
 
 ## Platforms
 
-This has been tested on Windows with MSVC and macOS. Linux using X11
-also works but does require a number of prerequisite packages to be installed.
+This has been tested on Windows with MSVC and macOS. Linux using
+Wayland (preferred) or X11.
 
-Still need to test Wayland support.
 
 ### Ubuntu 20, 22, 24
 
@@ -21,6 +20,30 @@ $ sudo apt-get update
 $ sudo apt-get install build-essential cmake ninja-build libx11-dev \
     libxext-dev libxft-dev libxft2-dev libxinerama-dev libxcursor-dev \
     libfontconfig-dev libopengl-dev freeglut3-dev libglu1-mesa-dev
+```
+
+### Fedora 42 - Wayland
+
+```bash
+$ sudo dnf update -y
+$ sudo dnf install -y git cmake g++ \
+    mesa-libGL-devel mesa-libGLU-devel mingw64-freeglut \
+    wayland-devel wayland-protocols-devel cairo-devel pango-devel \
+    libxkbcommon-devel dbus-devel libdecor-devel glew-devel \
+    libXinerama-devel libXfixes-devel libXcursor-devel
+```
+
+## Janet and Spork install
+
+1. Install Janet from https://github.com/janet-lang/janet/releases and make sure it is
+   in your PATH
+
+2. Install `spork`
+
+```bash
+$ git clone https://github.com/janet-lang/spork.git
+$ cd spork
+$ janet --install .
 ```
 
 ## Building

@@ -1,0 +1,30 @@
+FROM fedora:42
+WORKDIR /home/dev/github
+
+RUN dnf update -y && dnf install -y bash xterm
+
+RUN dnf update -y && dnf install -y git cmake ninja g++ \
+    mesa-libGL-devel mesa-libGLU-devel mingw64-freeglut \
+    wayland-devel wayland-protocols-devel cairo-devel pango-devel \
+    libxkbcommon-devel dbus-devel libdecor-devel glew-devel \
+    libXinerama-devel libXfixes-devel libXcursor-devel
+
+RUN git clone https://github.com/janet-lang/janet
+RUN git clone https://github.com/janet-lang/spork
+
+ADD . /home/dev/github/fltk-janet
+
+ENV PATH="/home/dev/janet/bin:/home/dev/janet/lib/janet/bin:$PATH"
+ENV PREFIX=/home/dev/janet
+RUN cd /home/dev/github/janet && make install
+RUN cd /home/dev/github/spork && janet --install .
+RUN cd /home/dev/github/fltk-janet && /home/dev/janet/lib/janet/bin/janet-pm install
+
+ENV DISPLAY=:0
+
+COPY --chmod=755 <<EOT /entrypoint.sh
+#!/usr/bin/env bash
+set -e
+xterm -fa 'Monospace' -fs 14
+EOT
+ENTRYPOINT ["/entrypoint.sh"]

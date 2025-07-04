@@ -72,7 +72,7 @@
   (if (sh/exists? fltk-config)
     (if (not (= (os/which) :windows))
       (do
-        (def out (sh/exec-slurp fltk-config "--use-gl" "--use-images" "--use-glut" "--use-forms" "--use-cairo" "--ldflags"))
+        (def out (sh/exec-slurp fltk-config "--use-gl" "--use-images" "--use-glut" "--use-cairo" "--ldflags"))
         (string/split " " out))
       @[])
     (do (build-cfltk)
