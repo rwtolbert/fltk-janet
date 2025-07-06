@@ -1,5 +1,7 @@
 # fltk-janet
 
+[![FLTK Janet](https://github.com/rwtolbert/fltk-janet/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/rwtolbert/fltk-janet/actions/workflows/main.yml)
+
 This is an experimental [FLTK](https://www.fltk.org) wrapper for Janet using the
 excellent [CFLTK](https://github.com/MoAlyousef/cfltk) code. Janet native code
 is generated via a Python script using `libclang` to parse the cfltk headers.
