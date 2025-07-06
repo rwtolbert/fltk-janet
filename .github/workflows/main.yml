@@ -6,6 +6,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: setup PATH
+        run: echo "$HOME/janet/bin" >> $GITHUB_PATH && echo "$HOME/janet/lib/janet/bin" >> $GITHUB_PATH
       - uses: actions/checkout@v4
         with:
           repository: rwtolbert/fltk-janet
@@ -19,8 +21,8 @@ jobs:
           repository: janet-lang/spork
           path: spork
       - name: Build janet
-        run: cd janet && PREFIX=../local make install && ../local/bin/janet -v
+        run: cd janet && PREFIX=$HOME/janet make install && janet -v
       - name: Build spork
-        run: cd spork && ../local/bin/janet --install .
+        run: cd spork && janet --install .
       - name: Build fltk-janet
-        run: ls $HOME && echo "../local/bin" >> $GITHUB_PATH && cd fltk-janet && ../local/lib/janet/bin/janet-pm build
+        run: echo "$HOME/janet/bin" >> $GITHUB_PATH && cd fltk-janet && janet-pm build
