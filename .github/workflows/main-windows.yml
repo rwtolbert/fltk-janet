@@ -40,6 +40,7 @@ jobs:
         shell: cmd        
       - name: Build spork
         run: |
+          ls $HOME/AppData/Local
           cd spork
           ../janet/janet --install .
         shell: pwsh
