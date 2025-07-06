@@ -20,3 +20,7 @@ jobs:
           path: spork
       - name: Build janet
         run: cd janet && PREFIX=../local make install && ../local/bin/janet -v
+      - name: Build spork
+        run: cd spork && ../local/bin/janet --install .
+      - name: Build fltk-janet
+        run: cd fltk-janet && ../local/lib/janet/bin/janet-pm build
