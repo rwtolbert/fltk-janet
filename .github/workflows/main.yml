@@ -19,4 +19,4 @@ jobs:
           repository: janet-lang/spork
           path: spork
       - name: Build janet
-        run: cd janet && make install && which janet
+        run: cd janet && PREFIX=../local make install && ../local/bin/janet -v
