@@ -9,7 +9,7 @@ jobs:
       - name: setup PATH and ENV
         run: |
           echo "$HOME/AppData/Local/Apps/Janet/bin" | Out-File -FilePath $Env:GITHUB_PATH -Encoding utf8 -Append
-          echo "$HOME/work/fltk-janet/janet/Library/bin" | Out-File -FilePath $Env:GITHUB_PATH -Encoding utf8 -Append
+          echo "$HOME/AppData/Local/Apps/Janet/Library/bin" | Out-File -FilePath $Env:GITHUB_PATH -Encoding utf8 -Append
         shell: pwsh
       - uses: actions/checkout@v4
         with:
@@ -41,9 +41,10 @@ jobs:
       - name: Build spork
         run: |
           ls $HOME/AppData/Local/Apps/Janet/bin
-          $HOME/AppData/Local/Apps/Janet/bin/janet.exe -v
+          cat $Env:GITHUB_PATH
+          janet.exe -v
           cd spork
-          janet --install .
+          janet.exe --install .
         shell: pwsh
       - name: Build fltk-janet
         run: |
