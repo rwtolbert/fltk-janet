@@ -4,11 +4,15 @@ on: [push]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+          matrix:
+             os: [ubuntu-latest, macos-latest]
     steps:
       - name: setup PATH
         run: echo "$HOME/janet/bin" >> $GITHUB_PATH && echo "$HOME/janet/lib/janet/bin" >> $GITHUB_PATH
-      - name: Install prereqs
+      - if: matrix.os == 'ubuntu-latest'
+        name: Install prereqs
         run: sudo apt-get update -y && sudo apt-get install -y git libx11-dev libxft-dev libxft2-dev build-essential libopengl-dev libglut-dev cmake libxinerama-dev libxcursor-dev ninja-build x11-apps
       - uses: actions/checkout@v4
         with:
