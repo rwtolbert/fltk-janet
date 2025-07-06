@@ -49,3 +49,7 @@ jobs:
         run: |
           refreshenv & cd fltk-janet & C:\Users\runneradmin\AppData\Local\Apps\Janet\Library\bin\janet-pm.bat build
         shell: cmd
+      - name: Install fltk-janet
+        run: |
+          refreshenv & cd fltk-janet & C:\Users\runneradmin\AppData\Local\Apps\Janet\Library\bin\janet-pm.bat install
+        shell: cmd
