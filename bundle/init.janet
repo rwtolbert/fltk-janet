@@ -29,7 +29,8 @@
 (def- cfltk-build-dir (string/format "_build/cfltk-build"))
 (def- fltk-flags @["-DFLTK_USE_SYSTEM_LIBJPEG=OFF"
                    "-DFLTK_USE_SYSTEM_LIBPNG=OFF"
-                   "-DFLTK_USE_SYSTEM_ZLIB=OFF"])
+                   "-DFLTK_USE_SYSTEM_ZLIB=OFF"
+                   "-DFLTK_BUILD_FORMS=ON"])
 (def- cfltk-flags @["-B" cfltk-build-dir "-S" "cfltk" "-G" "Ninja" "-DCMAKE_BUILD_TYPE=Release" "-DCFLTK_USE_OPENGL=ON" "-DFLTK_BUILD_EXAMPLES=OFF"])
 
 (when (= (os/which) :linux)
@@ -72,7 +73,7 @@
   (if (sh/exists? fltk-config)
     (if (not (= (os/which) :windows))
       (do
-        (def out (sh/exec-slurp fltk-config "--use-gl" "--use-images" "--use-glut" "--use-cairo" "--ldflags"))
+        (def out (sh/exec-slurp fltk-config "--use-gl" "--use-images" "--use-glut" "--use-forms" "--use-cairo" "--ldflags"))
         (string/split " " out))
       @[])
     (do (build-cfltk)

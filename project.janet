@@ -20,13 +20,13 @@
 (var lflags nil)
 (case (os/which)
   :windows (do
-             (set cppflags @["/bigobj" "-I./cfltk/include" "-DCFLTK_USE_GL"])
+             (set cppflags @["/bigobj" "-I./cfltk/include" "-DCFLTK_USE_GL" "-DFLTK_BUILD_FORMS"])
              (set lflags (dyn *lflags*)))
   :macos (do
-           (set cppflags @["-I./cfltk/include" "-DCFLTK_USE_GL"])
+           (set cppflags @["-I./cfltk/include" "-DCFLTK_USE_GL" "-DFLTK_BUILD_FORMS"])
            (set lflags (dyn *lflags*)))
   :linux (do
-           (set cppflags @["-fPIC" "-I./cfltk/include" "-DCFLTK_USE_GL"])
+           (set cppflags @["-fPIC" "-I./cfltk/include" "-DCFLTK_USE_GL" "-DFLTK_BUILD_FORMS"])
            (set lflags (dyn *lflags*))))
 
 (declare-native
