@@ -40,7 +40,8 @@ jobs:
         shell: cmd        
       - name: Build spork
         run: |
-          ls $HOME/AppData/Local
+          ls $HOME/AppData/Local/Apps/Janet/bin
+          echo $Env:GITHUB_PATH
           cd spork
           ../janet/janet --install .
         shell: pwsh
