@@ -1,0 +1,42 @@
+name: FLTK Janet - Windows
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: setup PATH and ENV
+        run: |
+          echo "$HOME/janet/bin" | Out-File -FilePath $Env:GITHUB_PATH -Encoding utf8 -Append
+          echo "$HOME/janet/lib/janet/bin" | Out-File -FilePath $Env:GITHUB_PATH -Encoding utf8 -Append
+          echo "PREFIX=$HOME/janet" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+        shell: pwsh
+      - uses: actions/checkout@v4
+        with:
+          repository: rwtolbert/fltk-janet
+          path: fltk-janet
+      - uses: actions/checkout@v4
+        with:
+          repository: janet-lang/janet
+          path: janet
+      - uses: actions/checkout@v4
+        with: 
+          repository: janet-lang/spork
+          path: spork
+      - name: Build janet
+        run: |
+          cd janet
+          make install
+          janet -v
+        shell: pwsh
+      - name: Build spork
+        run: |
+          cd spork
+          janet --install .
+        shell: pwsh
+      - name: Build fltk-janet
+        run: |
+          cd fltk-janet
+          janet-pm build
+        shell: pwsh
