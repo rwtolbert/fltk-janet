@@ -47,5 +47,5 @@ jobs:
         shell: cmd
       - name: Build fltk-janet
         run: |
-          refreshenv & cd fltk-janet & janet-pm.bat build
+          refreshenv & cd fltk-janet & C:\Users\runneradmin\AppData\Local\Apps\Janet\Library\bin\janet-pm.bat build
         shell: cmd
