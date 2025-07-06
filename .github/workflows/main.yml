@@ -23,4 +23,4 @@ jobs:
       - name: Build spork
         run: cd spork && ../local/bin/janet --install .
       - name: Build fltk-janet
-        run: cd fltk-janet && ../local/lib/janet/bin/janet-pm build
+        run: ls $HOME && echo "../local/bin" >> $GITHUB_PATH && cd fltk-janet && ../local/lib/janet/bin/janet-pm build
