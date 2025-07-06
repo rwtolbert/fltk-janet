@@ -26,8 +26,9 @@ jobs:
       - name: Build janet
         run: |
           cd janet
+          ${{ '"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" && build_win.bat' }}
           ${{ '"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" && build_win.bat dist' }}
-          build_win.bat install
+          ${{ '"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" && build_win.bat install' }}
           janet.exe -v
         shell: cmd
       - name: Build spork
