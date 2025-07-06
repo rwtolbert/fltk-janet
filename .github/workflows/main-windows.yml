@@ -41,9 +41,9 @@ jobs:
       - name: Build spork
         run: |
           ls $HOME/AppData/Local/Apps/Janet/bin
-          echo $Env:GITHUB_PATH
+          $HOME/AppData/Local/Apps/Janet/bin/janet.exe -v
           cd spork
-          ../janet/janet --install .
+          janet --install .
         shell: pwsh
       - name: Build fltk-janet
         run: |
