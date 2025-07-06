@@ -8,9 +8,8 @@ jobs:
     steps:
       - name: setup PATH and ENV
         run: |
-          echo "$HOME/janet/bin" | Out-File -FilePath $Env:GITHUB_PATH -Encoding utf8 -Append
-          echo "$HOME/janet/lib/janet/bin" | Out-File -FilePath $Env:GITHUB_PATH -Encoding utf8 -Append
-          echo "PREFIX=$HOME/janet" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+          echo "$HOME/work/fltk-janet/janet" | Out-File -FilePath $Env:GITHUB_PATH -Encoding utf8 -Append
+          echo "$HOME/work/fltk-janet/janet/Library/bin" | Out-File -FilePath $Env:GITHUB_PATH -Encoding utf8 -Append
         shell: pwsh
       - uses: actions/checkout@v4
         with:
@@ -27,8 +26,8 @@ jobs:
       - name: Build janet
         run: |
           cd janet
-          make install
-          janet -v
+          ./build_win.bat
+          ./janet.exe -v
         shell: pwsh
       - name: Build spork
         run: |
