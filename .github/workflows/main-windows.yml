@@ -41,10 +41,12 @@ jobs:
       - name: Build spork
         run: |
           refreshenv & cd spork & janet -l ./bundle -e "(do (setdyn :verbose true) (build))"
+        shell: cmd
+      - name: Test Install spork
+        run: |
           refreshenv & janet -e "(bundle/install `spork`)"
         shell: cmd
       - name: Build fltk-janet
         run: |
-          cd fltk-janet
-          janet-pm build
-        shell: pwsh
+          refreshenv & cd fltk-janet & janet-pm build
+        shell: cmd
