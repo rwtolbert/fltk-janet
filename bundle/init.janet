@@ -55,8 +55,8 @@
 (var fltk-lib-path nil)
 (if (= (os/which) :windows)
   (do
-    (set cfltk-lib-path (string/format "/LIBPATH:./%s/cfltk-build" cfltk-build-dir))
-    (set fltk-lib-path (string/format "/LIBPATH:./%s/cfltk-build/fltk/lib" cfltk-build-dir)))
+    (set cfltk-lib-path (string/format "/LIBPATH:./%s/" cfltk-build-dir))
+    (set fltk-lib-path (string/format "/LIBPATH:./%s/fltk/lib" cfltk-build-dir)))
   (do
     (set cfltk-lib-path (string/format "-L./%s" cfltk-build-dir))
     (set fltk-lib-path (string/format "-L./%s/fltk/lib" cfltk-build-dir))))
