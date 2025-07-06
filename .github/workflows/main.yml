@@ -9,9 +9,14 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: rwtolbert/fltk-janet
+          path: fltk-janet
       - uses: actions/checkout@v4
         with:
           repository: janet-lang/janet
+          path: janet
       - uses: actions/checkout@v4
         with: 
           repository: janet-lang/spork
+          path: spork
+      - name: Build janet
+        run: ls
