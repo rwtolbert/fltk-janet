@@ -1,0 +1,20 @@
+name: FLTK Janet
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      -name: Checkout
+      uses: actions/checkout@v4
+      with:
+        repository: rwtolbert/fltk-janet
+      -name: Setup Janet
+      uses: actions/checkout@v4
+      with:
+        repository: janet-lang/janet
+      -name: Setup Spork
+      uses: actions/checkout@v4
+      with: 
+        repository: janet-lang/spork
