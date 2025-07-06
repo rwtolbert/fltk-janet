@@ -40,12 +40,9 @@ jobs:
         shell: cmd        
       - name: Build spork
         run: |
-          ls $HOME/AppData/Local/Apps/Janet/bin
-          cat $Env:GITHUB_PATH
-          janet.exe -v
-          cd spork
-          janet.exe --install .
-        shell: pwsh
+          refreshenv & cd spork & janet -l ./bundle -e "(do (setdyn :verbose true) (build))"
+          refreshenv & janet -e "(bundle/install `spork`)"
+        shell: cmd
       - name: Build fltk-janet
         run: |
           cd fltk-janet
