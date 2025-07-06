@@ -27,12 +27,12 @@ jobs:
         run: |
           cd janet
           ${{ '"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" && build_win.bat' }}
-          ./janet.exe -v
+          janet.exe -v
         shell: cmd
       - name: Build spork
         run: |
           cd spork
-          janet --install .
+          ../janet/janet --install .
         shell: pwsh
       - name: Build fltk-janet
         run: |
