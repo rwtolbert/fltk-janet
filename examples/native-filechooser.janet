@@ -6,8 +6,7 @@
 
 (var *main-window* nil)
 (var *console* nil)
-
-(def- *fc* (fl-native-file-chooser-new Fl-NativeFileChooserType-BrowseFile))
+(var *fc* nil)
 
 (var- default-filename nil)
 (defn- untitled-default []
@@ -111,6 +110,7 @@
   (fl-double-window-resizable *main-window* *main-window*)
   (fl-double-window-show *main-window*)
 
+  (set *fc* (fl-native-file-chooser-new Fl-NativeFileChooserType-BrowseFile))
   (fl-native-file-chooser-set-filter *fc* "Text\t*.txt\n")
   (fl-native-file-chooser-set-preset-file *fc* (untitled-default))
   

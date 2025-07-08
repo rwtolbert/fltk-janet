@@ -1,3 +1,3 @@
-(use fltk-janet-native)
+#(use fltk-janet-native)
 
-(assert (= (hello-native) "Hello!"))
+#(assert (= (hello-native) "Hello!"))

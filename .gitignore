@@ -5,3 +5,10 @@ local_janet_deps/
 jfltk.so
 jfltk.dll
 .venv
+*.o
+*.obj
+
+# files that are generated
+jfltk/flags.janet
+jfltk/*.a
+jfltk/*.lib

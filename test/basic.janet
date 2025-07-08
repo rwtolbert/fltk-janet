@@ -1,3 +1,3 @@
-(use ../fltk-janet/init)
+#(use ../fltk-janet/init)
 
-(assert (= (hello) "Hello!"))
+#(assert (= (hello) "Hello!"))

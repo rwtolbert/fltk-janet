@@ -7,14 +7,14 @@
                     1)
     true 0))
 
+(defn main [&]
+  (def w (fl-window-new 100 100 400 300 "handler"))
+  (def f (fl-box-new 0 0 400 200 ""))
+  (def b (fl-button-new 160 210 80 40 "click me"))
+  (fl-window-end w)
+  (fl-window-show w)
 
-(def w (fl-window-new 100 100 400 300 "handler"))
-(def f (fl-box-new 0 0 400 200 ""))
-(def b (fl-button-new 160 210 80 40 "click me"))
-(fl-window-end w)
-(fl-window-show w)
+  (def cb (make-custom-callback clicker f))
 
-(def cb (make-custom-callback clicker f))
-
-(fl-button-handle b cb)
-(fl-run)
+  (fl-button-handle b cb)
+  (fl-run))
