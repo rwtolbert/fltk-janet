@@ -19,8 +19,6 @@
 # get lflags from jfltk module?
 (def- lflags jfltk/lflags)
 
-(def examples @["flex.janet"])
-
 (def- examples
   (do
     (var files @[])
@@ -35,5 +33,5 @@
   (declare-executable
     :name (string/replace ".janet" "" fname)
     :entry fname
-    :ldflags lflags
+    :libs lflags
     ))
