@@ -1,12 +1,13 @@
+(def info (-> (slurp info-file) (parse)))
+
 (import spork/sh)
 (import spork/path)
 
 (declare-project
-  :name "fltk-janet"
-  :description ```Janet wrapper for FLTK```
-  :author ```Bob Tolbert ```
-  :dependencies @["spork"]
-  :version "0.1.0")
+  :name (info :name)
+  :description (info :version)
+  :dependencies (info :jpm-dependencies)
+  :version (info :version))
 
 (def build-type (string (dyn *build-type* :release)))
 
