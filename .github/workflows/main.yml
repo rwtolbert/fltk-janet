@@ -30,6 +30,8 @@ jobs:
         run: cd janet && PREFIX=$HOME/janet make install && janet -v
       - name: Build spork
         run: cd spork && janet --install .
+      - name: Install fltk-janet deps
+        run: echo "$HOME/janet/bin" >> $GITHUB_PATH && cd fltk-janet && janet-pm deps
       - name: Build fltk-janet
         run: echo "$HOME/janet/bin" >> $GITHUB_PATH && cd fltk-janet && janet-pm build
 
@@ -74,6 +76,10 @@ jobs:
       - name: Test Install spork
         run: |
           refreshenv & janet -e "(bundle/install `spork`)"
+        shell: cmd
+      - name: Install fltk-janet deps
+        run: |
+          refreshenv & cd fltk-janet & C:\Users\runneradmin\AppData\Local\Apps\Janet\Library\bin\janet-pm.bat deps
         shell: cmd
       - name: Build fltk-janet
         run: |
