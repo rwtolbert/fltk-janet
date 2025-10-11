@@ -59,7 +59,7 @@
 
 (def- cmake-flags (array/concat cfltk-flags fltk-flags))
 
-(def [build-cfltk clean-cfltk]
+(def [build-cfltk-fn clean-cfltk-fn]
   (jnt/declare-cmake :name "cfltk"
                      :source-dir "cfltk"
                      :build-dir cfltk-build-dir
@@ -80,15 +80,16 @@
       (when (string/has-suffix? libname fname)
         (sh/rm fname)))))
 
-(task "build-cfltk" []
-      (update-submodules)
-      (clean-static-libs)
-      (build-cfltk)
-      (copy-static-libs))
+(defn- build-cfltk
+  []
+  (update-submodules)
+  (clean-static-libs)
+  (build-cfltk-fn)
+  (copy-static-libs))
 
-(task "pre-build" ["build-cfltk"])
+(task "pre-build" [] (build-cfltk))
 
-(task "clean-cfltk" [] (clean-cfltk))
+(task "clean-cfltk" [] (clean-cfltk-fn))
 
 (var cfltk-lib-path nil)
 (var fltk-lib-path nil)
