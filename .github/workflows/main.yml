@@ -34,6 +34,10 @@ jobs:
         run: echo "$HOME/janet/bin" >> $GITHUB_PATH && cd fltk-janet && janet-pm deps
       - name: Build fltk-janet
         run: echo "$HOME/janet/bin" >> $GITHUB_PATH && cd fltk-janet && janet-pm build
+      - name: Install fltk-janet
+        run: echo "$HOME/janet/bin" >> $GITHUB_PATH && cd fltk-janet && janet-pm install
+      - name: Build examples
+        run: echo "$HOME/janet/bin" >> $GITHUB_PATH && cd fltk-janet/examples && janet-pm build
 
   build-windows:
     runs-on: windows-latest
@@ -88,4 +92,8 @@ jobs:
       - name: Install fltk-janet
         run: |
           refreshenv & cd fltk-janet & C:\Users\runneradmin\AppData\Local\Apps\Janet\Library\bin\janet-pm.bat install
+        shell: cmd
+      - name: Build fltk-janet examples
+        run: |
+          refreshenv & cd fltk-janet/examples & C:\Users\runneradmin\AppData\Local\Apps\Janet\Library\bin\janet-pm.bat build
         shell: cmd
