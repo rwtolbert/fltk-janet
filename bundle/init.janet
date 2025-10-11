@@ -63,15 +63,16 @@
   (jnt/declare-cmake :name "cfltk"
                      :source-dir "cfltk"
                      :build-dir cfltk-build-dir
-                     :cmake-flags cmake-flags))
+                     :cmake-flags cmake-flags
+                     :build-type "Release"))
 
 (defn- copy-static-libs []
-  (sh/copy (string/format "%s/%s" cfltk-build-dir cfltk-lib) (string/format "./jfltk/%s" cfltk-lib))
+  (sh/copy-file (string/format "%s/%s" cfltk-build-dir cfltk-lib) (string/format "./jfltk/%s" cfltk-lib))
   (loop [fname :in fltk-libs]
     (let [fullname (string/format "%s/%s" fltk-build-dir fname)
           outname (string/format "./jfltk/%s" fname)]
       (when (sh/exists? fullname)
-        (sh/copy fullname outname)))))
+        (sh/copy-file fullname outname)))))
 
 (defn- clean-static-libs []
   (loop [fname :in (sh/list-all-files "jfltk")]
