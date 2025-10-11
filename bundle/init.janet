@@ -1,46 +1,47 @@
-(if (dyn :install-time-syspath)
-  (use @install-time-syspath/spork/declare-cc)
-  (use spork/declare-cc))
+(use spork/declare-cc)
 
-(setdyn :verbose true)
-(def- build-type "release")
+# force default to release unless specifically requested
+(when (not (os/getenv "JANET_BUILD_TYPE"))
+  (setdyn :build-type :release))
+
+# pull info.jdn so we don't duplicate symbols there and
+# in declare-project below
+(def info (-> (slurp "./bundle/info.jdn") parse))
+
+(declare-project
+  :name (info :name)
+  :description (info :description)
+  :version (info :version)
+  :dependencies (info :jpm-dependencies))
+
+###########
+(try
+  (import janet-native-tools :as jnt)
+  ([err fib]
+    (print "please run `janet-pm deps` or `jeep prep` first")))
 
 (import spork/pm)
 (import spork/sh)
 (import spork/path)
 (use ./utils)
 
-(defdyn *cmakepath* "What cmake command to use")
-(defdyn *ninjapath* "What ninja command to use")
-
-(defn- cmake
-  "Make a call to cmake."
-  [& args]
-  (printf "cmake %j" args)
-  (sh/exec (dyn *cmakepath* "cmake") ;args))
+# make sure we can find cmake and make
+(jnt/require-git)
+(jnt/require-cmake)
+(jnt/require-ninja)
 
 (defn- update-submodules []
-  (pm/git "submodule" "update" "--init" "--recursive"))
-
-(defn- lib-prefix []
-  (if (= (os/which) :windows)
-    ""
-    "lib"))
-
-(defn- lib-suffix []
-  (if (= (os/which) :windows)
-    ".lib"
-    ".a"))
+  (jnt/git "submodule" "update" "--init" "--recursive"))
 
 (def- cfltk-lib
-  (string (lib-prefix) "cfltk2" (lib-suffix)))
+  (string (jnt/gen-static-libname "cfltk2")))
 
 (def- fltk-build-dir (string/format "_build/cfltk-build/fltk/lib"))
 (def- fltk-libs
   (do
     (var results @[])
     (loop [item :in ["fltk" "fltk_gl" "fltk_forms" "fltk_images" "fltk_png" "fltk_jpeg" "fltk_z"]]
-      (array/push results (string (lib-prefix) item (lib-suffix))))
+      (array/push results (string (jnt/gen-static-libname item))))
     results))
 
 (def- cfltk-build-dir (string/format "_build/cfltk-build"))
@@ -57,7 +58,12 @@
   (array/push fltk-flags "-DFLTK_BACKEND_WAYLAND=ON"))
 
 (def- cmake-flags (array/concat cfltk-flags fltk-flags))
-(def- cmake-build-flags @["--build" cfltk-build-dir "--parallel" "--config" "Release"])
+
+(def [build-cfltk clean-cfltk]
+  (jnt/declare-cmake :name "cfltk"
+                     :source-dir "cfltk"
+                     :build-dir cfltk-build-dir
+                     :cmake-flags cmake-flags))
 
 (defn- copy-static-libs []
   (sh/copy (string/format "%s/%s" cfltk-build-dir cfltk-lib) (string/format "./jfltk/%s" cfltk-lib))
@@ -65,27 +71,23 @@
     (let [fullname (string/format "%s/%s" fltk-build-dir fname)
           outname (string/format "./jfltk/%s" fname)]
       (when (sh/exists? fullname)
-        (sh/copy fullname outname )))))
+        (sh/copy fullname outname)))))
 
 (defn- clean-static-libs []
   (loop [fname :in (sh/list-all-files "jfltk")]
-    (when (string/has-suffix? (lib-suffix) fname)
-      (sh/rm fname))))
+    (each libname fltk-libs
+      (when (string/has-suffix? libname fname)
+        (sh/rm fname)))))
 
-(defn build-cfltk []
-  (unless (and (sh/exists? "cfltk") (sh/exists? "cfltk/fltk"))
-    (update-submodules))
-  # remove old static libs, might be stale
-  (clean-static-libs)
-  (unless (sh/exists? (string/format "%s/%s" cfltk-build-dir cfltk-lib))
-    (unless (sh/exists? (string/format "%s/%s" cfltk-build-dir "build.ninja"))
-      (cmake ;cmake-flags))
-    (do (cmake ;cmake-build-flags)))
-  # copy static libs, assuming they have been built
-  (copy-static-libs))
+(task "build-cfltk" []
+      (update-submodules)
+      (clean-static-libs)
+      (build-cfltk)
+      (copy-static-libs))
 
-(set-command "cmake" *cmakepath*)
-(set-command "ninja" *ninjapath*)
+(task "pre-build" ["build-cfltk"])
+
+(task "clean-cfltk" [] (clean-cfltk))
 
 (var cfltk-lib-path nil)
 (var fltk-lib-path nil)
@@ -105,7 +107,7 @@
     "glu32.lib" "opengl32.lib" "ole32.lib" "uuid.lib" "comctl32.lib" "gdi32.lib" "gdiplus.lib"
     "user32.lib" "shell32.lib" "comdlg32.lib" "ws2_32.lib" "winspool.lib"])
 
-(defn fltk-link-libs []
+(defn- fltk-link-libs []
   (if (sh/exists? fltk-config)
     (if (not (= (os/which) :windows))
       (do
@@ -113,39 +115,31 @@
         (string/split " " out))
       @[])
     (do (build-cfltk)
-        (fltk-link-libs))))
+      (fltk-link-libs))))
 
-(defn gen-lflags []
+(defn- gen-lflags []
   (if (= (os/which) :windows)
     windows-fltk-link-libs
     (array/join @[cfltk-lib-path "-lcfltk2"] (fltk-link-libs))))
 
-(defdyn *lflags* "Linker flags")
-(setdyn *lflags* (gen-lflags))
+(var cppflags nil)
+(def- lflags (gen-lflags))
+(case (os/which)
+  :windows (set cppflags @["/bigobj" "-I./cfltk/include" "-DCFLTK_USE_GL" "-DFLTK_BUILD_FORMS"])
+  :macos (set cppflags @["-I./cfltk/include" "-DCFLTK_USE_GL" "-DFLTK_BUILD_FORMS"])
+  :linux (set cppflags @["-fPIC" "-I./cfltk/include" "-DCFLTK_USE_GL" "-DFLTK_BUILD_FORMS"]))
 
-(task "pre-build" ["build-cfltk" "create-flags"])
+(declare-source
+  :source ["jfltk"])
 
-(dofile "project.janet" :env (jpm-shim-env))
+(declare-native
+  :name "jfltk/widgets"
+  :source @["c/module.cpp"]
+  :c++flags cppflags
+  :lflags lflags)
 
-(task "build-cfltk" []
-      (build-cfltk))
+# create a new task to run the ldflags fixup
+(task "fix-up-ldflags" [] (jnt/fix-up-ldflags "jfltk" "widgets.meta.janet"))
 
-# this creates a file in jfltk that can be used to get to the
-# platform specific linker flags to compile Janet+FLTK apps into
-# full executables. Have a look in "examples/" for an example
-(task "create-flags" []
-      (def flags (gen-lflags))
-      (var real-flags @[])
-      (loop [item :in flags]
-        (if (and (string/has-prefix? "-L" item) (not (string/find "/usr" item)))
-          (array/push real-flags '(get-libdir))
-          (array/push real-flags item)))
-      (def fname (string (os/cwd) "/jfltk/flags.janet"))
-      (def ofs (file/open fname :w))
-      (file/write ofs "(import spork/path)\n")
-      (file/write ofs "(defn get-libdir [] (string \"-L\" (path/abspath (path/dirname (dyn *current-file*)))))\n")
-      (file/write ofs (string/format "(def lflags %j)\n" real-flags))
-      (file/write ofs "(defn print-lflags [] (pp lflags))\n")
-      (file/close ofs))
-
-
+# attach this task to the post-install hook
+(task "post-install" ["fix-up-ldflags"])

@@ -16,9 +16,6 @@
 
 (setdyn *build-type* :release)
 
-# get lflags from jfltk module?
-(def- lflags jfltk/lflags)
-
 (def- examples
   (do
     (var files @[])
@@ -33,5 +30,4 @@
   (declare-executable
     :name (string/replace ".janet" "" fname)
     :entry fname
-    :libs lflags
     ))

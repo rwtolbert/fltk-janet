@@ -1,7 +1,7 @@
 @{:author "Bob Tolbert "
-  :dependencies @["spork"]
   :description "Janet wrapper for FLTK"
   :license "MIT"
-  :jpm-dependencies @["spork"]
-  :name "fltk-janet"
+  :jpm-dependencies @["spork"
+                      {:url "https://github.com/rwtolbert/janet-native-tools.git" :tag "0.2.0"}]
+  :name "jfltk"
   :version "0.3.0"}
