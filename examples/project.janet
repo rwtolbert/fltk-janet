@@ -1,5 +1,3 @@
-(import jfltk)
-
 (import spork/sh)
 (import spork/path)
 
