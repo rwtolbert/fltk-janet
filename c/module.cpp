@@ -83,14 +83,14 @@ public:
         }
     }
 
-    ~Callbacker() {
+    void mark() {
         if (_func)
             janet_mark(janet_wrap_function(_func));
+        janet_mark(_data);
     }
 };
 
 struct JanetFlCallback {
-  JanetGCObject gc;
   Callbacker* cb = nullptr;
 };
 
@@ -106,6 +106,9 @@ int callback_set_gc(void *data, size_t len) {
 
 int callback_set_gcmark(void *data, size_t len) {
   (void)len;
+  JanetFlCallback *self = (JanetFlCallback *)data;
+  if (self && self->cb)
+    self->cb->mark();
   return 0;
 }
 
@@ -130,7 +133,7 @@ void initialize_callbacker_type() {
 JanetFlCallback *new_abstract_callback(JanetFunction *fn, const Janet *argv,
                                        int32_t flag_start, int32_t argc) {
   initialize_callbacker_type();
-  JanetFlCallback *cb = (JanetFlCallback *)janet_abstract(&callbacker_type, sizeof(Callbacker));
+  JanetFlCallback *cb = (JanetFlCallback *)janet_abstract(&callbacker_type, sizeof(JanetFlCallback));
 
   Callbacker* callbacker = nullptr;
   if (argc == 2) {

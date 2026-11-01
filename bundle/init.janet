@@ -18,7 +18,7 @@
 (try
   (import janet-native-tools :as jnt)
   ([err fib]
-    (print "please run `janet-pm deps` or `jeep prep` first")))
+    (error "please run `janet-pm deps` or `jeep prep` first")))
 
 (import spork/pm)
 (import spork/sh)
@@ -50,8 +50,11 @@
                    "-DFLTK_USE_SYSTEM_LIBPNG=OFF"
                    "-DFLTK_USE_SYSTEM_ZLIB=OFF"
                    "-DFLTK_BUILD_FORMS=ON"])
+
+(def- c-build-type (case (dyn :build-type) :debug "Debug" "Release"))
+
 (def- cfltk-flags @["-B" cfltk-build-dir "-S" "cfltk" "-G" "Ninja"
-                    "-DCMAKE_BUILD_TYPE=Release" "-DCFLTK_USE_OPENGL=ON" "-DFLTK_BUILD_EXAMPLES=OFF"])
+                    (string "-DCMAKE_BUILD_TYPE=" c-build-type) "-DCFLTK_USE_OPENGL=ON" "-DFLTK_BUILD_EXAMPLES=OFF"])
 
 (when (= (os/which) :linux)
   (array/push fltk-flags "-DCFLTK_USE_FPIC=ON")
@@ -64,7 +67,7 @@
                      :source-dir "cfltk"
                      :build-dir cfltk-build-dir
                      :cmake-flags cmake-flags
-                     :build-type "Release"))
+                     :build-type c-build-type))
 
 (defn- copy-static-libs []
   (sh/copy-file (string/format "%s/%s" cfltk-build-dir cfltk-lib) (string/format "./jfltk/%s" cfltk-lib))
